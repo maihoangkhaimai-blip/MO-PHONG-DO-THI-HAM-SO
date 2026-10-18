@@ -1,0 +1,3521 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mô phỏng Tương tác Đồ thị Hàm số Lớp 9</title>
+  <meta name="description" content="Ứng dụng tương tác trực quan đồ thị hàm số bậc nhất, bậc hai, tương giao Parabol và công cụ đánh dấu điểm dành cho học sinh Lớp 9." />
+  <meta property="og:title" content="Mô phỏng Tương tác Đồ thị Hàm số Lớp 9" />
+  <meta property="og:description" content="Ứng dụng tương tác trực quan đồ thị hàm số bậc nhất, bậc hai, tương giao Parabol và công cụ đánh dấu điểm dành cho học sinh Lớp 9." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --secondary: #4f46e5;
+      --accent: #f59e0b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --purple: #8b5cf6;
+      --pink: #ec4899;
+      --bg-main: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --canvas-bg: #ffffff;
+      --grid-major: rgba(148, 163, 184, 0.45);
+      --grid-minor: rgba(226, 232, 240, 0.7);
+      --axis-color: #1e293b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Header */
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.65rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 2.25rem;
+      height: 2.25rem;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: white;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      font-weight: 700;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    }
+
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .mode-tabs {
+      display: flex;
+      background: #f1f5f9;
+      padding: 0.25rem;
+      border-radius: 0.6rem;
+      gap: 0.25rem;
+    }
+
+    .tab-btn {
+      padding: 0.45rem 0.85rem;
+      border: none;
+      background: transparent;
+      border-radius: 0.45rem;
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: #0f172a;
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-action {
+      padding: 0.45rem 0.75rem;
+      border-radius: 0.45rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+      color: #334155;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-action:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+
+    .btn-lang {
+      background: #f8fafc;
+      font-family: inherit;
+      border-color: #cbd5e1;
+      color: var(--primary);
+    }
+
+    .btn-download {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+    }
+
+    .btn-download:hover {
+      background: #1d4ed8;
+      color: #ffffff;
+    }
+
+    /* Main Workspace Layout */
+    .workspace {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 61px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Left: Canvas Area (70%) */
+    .canvas-container {
+      flex: 7;
+      position: relative;
+      background: var(--canvas-bg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+
+    canvas.cursor-marker {
+      cursor: copy !important;
+    }
+
+    canvas.cursor-drag-active {
+      cursor: move !important;
+    }
+
+    /* Floating Canvas Toolbar */
+    .canvas-toolbar {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.4rem;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(8px);
+      padding: 0.35rem;
+      border-radius: 0.6rem;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      z-index: 10;
+    }
+
+    .tool-btn {
+      min-width: 2rem;
+      height: 2rem;
+      padding: 0 0.5rem;
+      border: none;
+      background: transparent;
+      border-radius: 0.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      color: #475569;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+
+    .tool-btn:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .tool-btn.active {
+      background: #eff6ff;
+      color: var(--primary);
+      border: 1px solid #bfdbfe;
+    }
+
+    .tool-btn.active-marker {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    /* Tooltip / Hint on Canvas */
+    .canvas-interaction-banner {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(6px);
+      color: #ffffff;
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      font-size: 0.76rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 10;
+      pointer-events: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Floating Legend */
+    .canvas-legend {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(8px);
+      padding: 0.5rem 0.85rem;
+      border-radius: 0.6rem;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .legend-dot {
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 50%;
+    }
+
+    .legend-line {
+      width: 1rem;
+      height: 0.2rem;
+      border-radius: 1px;
+    }
+
+    /* Cursor Info Badge */
+    .cursor-badge {
+      position: absolute;
+      background: rgba(15, 23, 42, 0.88);
+      color: #ffffff;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.4rem;
+      font-size: 0.72rem;
+      font-family: monospace;
+      pointer-events: none;
+      z-index: 15;
+      display: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transform: translate(12px, -24px);
+      white-space: nowrap;
+    }
+
+    /* Right: Control Panel (30%) */
+    .panel-container {
+      flex: 3;
+      min-width: 350px;
+      max-width: 460px;
+      background: #ffffff;
+      border-left: 1px solid var(--border-color);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1.15rem;
+      z-index: 10;
+      box-shadow: -2px 0 8px rgba(0,0,0,0.02);
+    }
+
+    /* Cards */
+    .card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .card-title .icon {
+      color: var(--primary);
+    }
+
+    /* Live Equation Banner */
+    .equation-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 0.6rem;
+      padding: 0.75rem 1rem;
+      text-align: center;
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: #1d4ed8;
+      font-family: 'Cambria Math', 'Times New Roman', serif;
+      letter-spacing: 0.02em;
+      box-shadow: inset 0 1px 2px rgba(37, 99, 235, 0.05);
+      line-height: 1.4;
+    }
+
+    /* Coefficient Sliders */
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .slider-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .slider-header span.coef-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .slider-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #e2e8f0;
+      border-radius: 9999px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(37,99,235,0.4);
+      transition: transform 0.1s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    input[type="number"] {
+      width: 5.25rem;
+      padding: 0.3rem 0.4rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.4rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+      color: #0f172a;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Quick Preset Buttons */
+    .presets-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.25rem;
+    }
+
+    .preset-btn {
+      padding: 0.25rem 0.5rem;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.35rem;
+      font-size: 0.72rem;
+      color: #475569;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+
+    .preset-btn:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .preset-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    /* Results / Properties List */
+    .prop-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    .prop-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.45rem 0.6rem;
+      background: #f8fafc;
+      border-radius: 0.45rem;
+      border: 1px solid #f1f5f9;
+    }
+
+    .prop-label {
+      color: #64748b;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .prop-value {
+      font-weight: 700;
+      color: #0f172a;
+      font-family: 'Cambria Math', monospace;
+    }
+
+    .badge-pill {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      border-radius: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-orange { background: #fef3c7; color: #92400e; }
+    .badge-red { background: #fee2e2; color: #991b1b; }
+    .badge-purple { background: #ede9fe; color: #5b21b6; }
+    .badge-pink { background: #fce7f3; color: #9d174d; }
+
+    /* Warning banner */
+    .alert-banner {
+      background: #fffbeb;
+      border-left: 3px solid #f59e0b;
+      padding: 0.6rem 0.75rem;
+      border-radius: 0.35rem;
+      font-size: 0.78rem;
+      color: #b45309;
+      line-height: 1.4;
+      display: none;
+    }
+
+    /* Pedagogical Insight Box */
+    .insight-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 0.6rem;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .insight-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #166534;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .insight-content {
+      font-size: 0.775rem;
+      color: #15803d;
+      line-height: 1.45;
+    }
+
+    .insight-bullet {
+      margin-left: 1rem;
+      margin-top: 0.25rem;
+    }
+
+    /* Data Table */
+    .data-table-wrap {
+      overflow-x: auto;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border-color);
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      text-align: center;
+    }
+
+    table.data-table th {
+      background: #f1f5f9;
+      color: #475569;
+      padding: 0.4rem 0.5rem;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+    }
+
+    table.data-table th:last-child {
+      border-right: none;
+    }
+
+    table.data-table td {
+      padding: 0.4rem 0.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      border-right: 1px solid #f1f5f9;
+      font-family: monospace;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    table.data-table td:last-child {
+      border-right: none;
+    }
+
+    table.data-table tr:hover {
+      background: #f8fafc;
+    }
+
+    /* Custom Marked Points Card */
+    .points-action-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .marked-points-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .marked-point-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.4rem 0.6rem;
+      border-radius: 0.4rem;
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      font-size: 0.78rem;
+    }
+
+    .marked-point-info {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: monospace;
+      font-weight: 600;
+    }
+
+    .btn-del-point {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0 0.2rem;
+    }
+
+    .btn-del-point:hover {
+      color: #ef4444;
+    }
+
+    /* Challenge Box */
+    .challenge-box {
+      border: 1px dashed #6366f1;
+      background: #faf5ff;
+      border-radius: 0.6rem;
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .challenge-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .challenge-title {
+      font-size: 0.825rem;
+      font-weight: 700;
+      color: #581c87;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .challenge-selector {
+      width: 100%;
+      padding: 0.35rem 0.5rem;
+      font-size: 0.78rem;
+      border: 1px solid #c084fc;
+      border-radius: 0.4rem;
+      background: #ffffff;
+      color: #581c87;
+      font-weight: 600;
+      outline: none;
+    }
+
+    .challenge-desc {
+      font-size: 0.775rem;
+      color: #6b21a8;
+      line-height: 1.45;
+      background: #ffffff;
+      padding: 0.5rem 0.65rem;
+      border-radius: 0.4rem;
+      border: 1px solid #f3e8ff;
+    }
+
+    .challenge-actions {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.25rem;
+    }
+
+    .btn-quiz {
+      flex: 1;
+      padding: 0.45rem 0.6rem;
+      border-radius: 0.45rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      transition: all 0.15s;
+    }
+
+    .btn-quiz-check {
+      background: #7c3aed;
+      color: white;
+    }
+
+    .btn-quiz-check:hover {
+      background: #6d28d9;
+    }
+
+    .btn-quiz-hint {
+      background: #ffffff;
+      border: 1px solid #c084fc;
+      color: #7c3aed;
+    }
+
+    .btn-quiz-hint:hover {
+      background: #f5f3ff;
+    }
+
+    .btn-quiz-apply {
+      background: #f3e8ff;
+      border: 1px solid #d8b4fe;
+      color: #6b21a8;
+    }
+
+    .btn-quiz-apply:hover {
+      background: #e9d5ff;
+    }
+
+    .challenge-result {
+      font-size: 0.775rem;
+      padding: 0.45rem 0.6rem;
+      border-radius: 0.4rem;
+      display: none;
+      line-height: 1.4;
+      font-weight: 600;
+    }
+
+    .challenge-result.success {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
+      display: block;
+    }
+
+    .challenge-result.error {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+      display: block;
+    }
+
+    .challenge-hint-text {
+      font-size: 0.75rem;
+      color: #701a75;
+      background: #fae8ff;
+      padding: 0.45rem 0.6rem;
+      border-radius: 0.4rem;
+      display: none;
+      line-height: 1.4;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-box {
+      background: #ffffff;
+      border-radius: 0.75rem;
+      max-width: 560px;
+      width: 100%;
+      padding: 1.5rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.75rem;
+    }
+
+    .modal-header h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+      color: #64748b;
+    }
+
+    .modal-body {
+      font-size: 0.85rem;
+      color: #334155;
+      line-height: 1.6;
+    }
+
+    .modal-body ul {
+      margin-left: 1.25rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+      header {
+        flex-wrap: wrap;
+        padding: 0.5rem 0.75rem;
+      }
+      .brand-text h1 {
+        font-size: 0.95rem;
+      }
+      .workspace {
+        flex-direction: column;
+        height: auto;
+        overflow-y: auto;
+      }
+      .canvas-container {
+        flex: none;
+        height: 55vh;
+        min-height: 380px;
+      }
+      .panel-container {
+        flex: none;
+        max-width: 100%;
+        min-width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">𝑓(𝑥)</div>
+      <div class="brand-text">
+        <h1 id="txt-app-title">Mô phỏng Đồ thị Hàm số Lớp 9</h1>
+        <p id="txt-app-subtitle">Khảo sát & Tương giao trực quan Oxy</p>
+      </div>
+    </div>
+
+    <!-- Mode Selector Tabs (4 Modes) -->
+    <div class="mode-tabs">
+      <button class="tab-btn active" id="tab-linear" onclick="switchMode('linear')">
+        <span>📈</span> <span id="txt-tab-linear">Bậc nhất: y = ax + b</span>
+      </button>
+      <button class="tab-btn" id="tab-quadratic" onclick="switchMode('quadratic')">
+        <span>📉</span> <span id="txt-tab-quadratic">Bậc hai: y = ax² + bx + c</span>
+      </button>
+      <button class="tab-btn" id="tab-intersect" onclick="switchMode('intersect')">
+        <span>🔀</span> <span id="txt-tab-intersect">Tương giao: (P) & (d)</span>
+      </button>
+      <button class="tab-btn" id="tab-two-parabolas" onclick="switchMode('two-parabolas')">
+        <span>💫</span> <span id="txt-tab-two-parabolas">2 Parabol: (P₁) & (P₂)</span>
+      </button>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <button class="btn-action btn-lang" id="btn-lang-toggle" onclick="toggleLanguage()">
+        🌐 <span id="txt-btn-lang">VI / EN</span>
+      </button>
+      <button class="btn-action" onclick="openHelpModal()">
+        ℹ️ <span id="txt-btn-guide">Hướng dẫn</span>
+      </button>
+      <button class="btn-action btn-download" onclick="downloadStandaloneHTML()" title="Lưu trang web này về máy thành tệp index.html hoàn chỉnh">
+        💾 <span id="txt-btn-download">Tải index.html</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Workspace -->
+  <div class="workspace" id="workspace-area">
+
+    <!-- Left Canvas Area (70%) -->
+    <div class="canvas-container" id="canvas-wrapper">
+      <canvas id="graph-canvas"></canvas>
+
+      <!-- Dynamic Interaction Banner -->
+      <div class="canvas-interaction-banner" id="canvas-hint-banner">
+        <span>💡</span> <span id="canvas-hint-text">Rê chuột kiểm tra tọa độ | Bật 🖐️ Kéo đồ thị hoặc 📍 Chấm điểm</span>
+      </div>
+
+      <!-- Canvas Floating Toolbar -->
+      <div class="canvas-toolbar">
+        <button class="tool-btn active" id="btn-toggle-drag" onclick="toggleDirectDragMode()" title="Bật/Tắt kéo thả điểm trên đồ thị để đổi hệ số">
+          <span>🖐️</span> <span id="txt-btn-drag-mode">Kéo đồ thị</span>
+        </button>
+        <button class="tool-btn" id="btn-toggle-marker" onclick="toggleMarkerMode()" title="Chấm điểm trực tiếp lên mặt phẳng Oxy">
+          <span>📍</span> <span id="txt-btn-marker-mode">Chấm điểm</span>
+        </button>
+        <button class="tool-btn" id="btn-toggle-eraser" onclick="toggleEraserMode()" title="Bật/Tắt chế độ xóa điểm (Nhấp hoặc bấm chuột phải vào điểm để xóa)">
+          <span>🧹</span> <span id="txt-btn-eraser-mode">Xóa điểm</span>
+        </button>
+        <button class="tool-btn" onclick="zoomCanvas(1.2)" title="Phóng to (Zoom In)">➕</button>
+        <button class="tool-btn" onclick="zoomCanvas(0.8)" title="Thu nhỏ (Zoom Out)">➖</button>
+        <button class="tool-btn" onclick="resetCanvasView()" title="Khôi phục góc nhìn chuẩn (Reset View)">🎯</button>
+        <button class="tool-btn active" id="btn-toggle-grid" onclick="toggleGrid()" title="Bật/Tắt Lưới">▦</button>
+        <button class="tool-btn" onclick="exportGraphImage()" title="Xuất ảnh PNG">📷</button>
+        <button class="tool-btn" onclick="toggleFullscreen()" title="Toàn màn hình (Fullscreen)">⛶</button>
+      </div>
+
+      <!-- Canvas Legend -->
+      <div class="canvas-legend" id="canvas-legend">
+        <!-- populated dynamically -->
+      </div>
+
+      <!-- Cursor Tooltip Badge -->
+      <div class="cursor-badge" id="cursor-badge">x: 0, y: 0</div>
+    </div>
+
+    <!-- Right Control Panel (30%) -->
+    <div class="panel-container">
+
+      <!-- Equation Display Card -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="icon">📐</span> <span id="txt-title-equation">Phương trình hàm số</span></span>
+          <span class="badge-pill badge-blue" id="badge-mode">Hàm bậc nhất</span>
+        </div>
+        <div class="equation-banner" id="banner-equation">y = 1x + 0</div>
+        <div class="alert-banner" id="banner-warning"></div>
+      </div>
+
+      <!-- Sliders & Coefficients Card -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="icon">🎛️</span> <span id="txt-title-coefficients">Hệ số & Tham số</span></span>
+          <button class="preset-btn" onclick="resetCoefficients()" id="txt-btn-reset-coef">Mặc định</button>
+        </div>
+
+        <!-- Slider Range Quick Selector -->
+        <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.75rem; color:#64748b; padding-bottom:0.35rem; border-bottom:1px dashed #e2e8f0;">
+          <span id="txt-lbl-slider-range" style="font-weight:600;">Miền thanh trượt:</span>
+          <div style="display:flex; gap:0.25rem;">
+            <button class="preset-btn active" id="btn-range-5" onclick="setSliderRange(5)">[-5, 5]</button>
+            <button class="preset-btn" id="btn-range-10" onclick="setSliderRange(10)">[-10, 10]</button>
+            <button class="preset-btn" id="btn-range-25" onclick="setSliderRange(25)">[-25, 25]</button>
+            <button class="preset-btn" id="btn-range-50" onclick="setSliderRange(50)">[-50, 50]</button>
+          </div>
+        </div>
+
+        <!-- Mode 4 Sub-Tabs: Parabola 1 or Parabola 2 select -->
+        <div id="parabola-select-row" style="display:none; gap:0.4rem; margin-bottom:0.4rem;">
+          <button class="tab-btn active" id="btn-sel-p1" style="flex:1; justify-content:center; border:1px solid #bfdbfe;" onclick="selectParabolaEdit(1)">
+            🔵 (P₁): y = a₁x² + b₁x + c₁
+          </button>
+          <button class="tab-btn" id="btn-sel-p2" style="flex:1; justify-content:center; border:1px solid #fed7aa;" onclick="selectParabolaEdit(2)">
+            🟠 (P₂): y = a₂x² + b₂x + c₂
+          </button>
+        </div>
+
+        <div class="slider-group">
+          <!-- Slider A -->
+          <div class="slider-item" id="group-param-a">
+            <div class="slider-header">
+              <span class="coef-tag">
+                <span id="label-coef-a">Hệ số a</span>
+                <small id="sub-coef-a" style="color: #64748b;">(độ dốc / bề lõm)</small>
+              </span>
+              <span style="font-weight:700; color:var(--primary);" id="val-display-a">1.0</span>
+            </div>
+            <div class="slider-controls">
+              <input type="range" id="slider-a" min="-5" max="5" step="0.1" value="1" oninput="onSliderChange('a', this.value)" />
+              <input type="number" id="num-a" step="any" value="1" oninput="onNumberChange('a', this.value)" placeholder="a" title="Nhập bất kỳ giá trị nào cho a" />
+            </div>
+            <div class="presets-row" id="presets-a">
+              <button class="preset-btn" onclick="setCoef('a', -5)">-5</button>
+              <button class="preset-btn" onclick="setCoef('a', -2)">-2</button>
+              <button class="preset-btn" onclick="setCoef('a', -1)">-1</button>
+              <button class="preset-btn" onclick="setCoef('a', 0.5)">0.5</button>
+              <button class="preset-btn" onclick="setCoef('a', 1)">1</button>
+              <button class="preset-btn" onclick="setCoef('a', 2)">2</button>
+              <button class="preset-btn" onclick="setCoef('a', 10)">10</button>
+            </div>
+          </div>
+
+          <!-- Slider B -->
+          <div class="slider-item" id="group-param-b">
+            <div class="slider-header">
+              <span class="coef-tag">
+                <span id="label-coef-b">Hệ số b</span>
+                <small id="sub-coef-b" style="color: #64748b;">(tung độ gốc / tịnh tiến)</small>
+              </span>
+              <span style="font-weight:700; color:var(--primary);" id="val-display-b">0.0</span>
+            </div>
+            <div class="slider-controls">
+              <input type="range" id="slider-b" min="-5" max="5" step="0.1" value="0" oninput="onSliderChange('b', this.value)" />
+              <input type="number" id="num-b" step="any" value="0" oninput="onNumberChange('b', this.value)" placeholder="b" title="Nhập bất kỳ giá trị nào cho b" />
+            </div>
+            <div class="presets-row" id="presets-b">
+              <button class="preset-btn" onclick="setCoef('b', -10)">-10</button>
+              <button class="preset-btn" onclick="setCoef('b', -3)">-3</button>
+              <button class="preset-btn" onclick="setCoef('b', -1)">-1</button>
+              <button class="preset-btn" onclick="setCoef('b', 0)">0</button>
+              <button class="preset-btn" onclick="setCoef('b', 1)">1</button>
+              <button class="preset-btn" onclick="setCoef('b', 3)">3</button>
+              <button class="preset-btn" onclick="setCoef('b', 10)">10</button>
+            </div>
+          </div>
+
+          <!-- Slider C -->
+          <div class="slider-item" id="group-param-c">
+            <div class="slider-header">
+              <span class="coef-tag">
+                <span id="label-coef-c">Hệ số c</span>
+                <small id="sub-coef-c" style="color: #64748b;">(giao điểm Oy)</small>
+              </span>
+              <span style="font-weight:700; color:var(--primary);" id="val-display-c">0.0</span>
+            </div>
+            <div class="slider-controls">
+              <input type="range" id="slider-c" min="-5" max="5" step="0.1" value="0" oninput="onSliderChange('c', this.value)" />
+              <input type="number" id="num-c" step="any" value="0" oninput="onNumberChange('c', this.value)" placeholder="c" title="Nhập bất kỳ giá trị nào cho c" />
+            </div>
+            <div class="presets-row" id="presets-c">
+              <button class="preset-btn" onclick="setCoef('c', -10)">-10</button>
+              <button class="preset-btn" onclick="setCoef('c', -4)">-4</button>
+              <button class="preset-btn" onclick="setCoef('c', -2)">-2</button>
+              <button class="preset-btn" onclick="setCoef('c', 0)">0</button>
+              <button class="preset-btn" onclick="setCoef('c', 2)">2</button>
+              <button class="preset-btn" onclick="setCoef('c', 4)">4</button>
+              <button class="preset-btn" onclick="setCoef('c', 10)">10</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Points Marker Card (ĐÁNH DẤU CÁC ĐIỂM) -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="icon">📍</span> <span id="txt-title-marked-points">Điểm đánh dấu & Khảo sát</span></span>
+          <span class="badge-pill badge-purple" id="marked-count-badge">0 điểm</span>
+        </div>
+        <div class="points-action-bar">
+          <button class="preset-btn" style="background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;" onclick="addPointFromTable()">
+            📥 <span id="txt-btn-plot-table">Chấm 5 điểm từ bảng</span>
+          </button>
+          <button class="preset-btn" style="background:#fef2f2; color:#b91c1c; border-color:#fecaca;" onclick="clearCustomPoints()">
+            🗑️ <span id="txt-btn-clear-points">Xóa tất cả</span>
+          </button>
+        </div>
+        <div class="marked-points-list" id="marked-points-container">
+          <div style="font-size:0.75rem; color:#94a3b8; font-style:italic;" id="txt-empty-points-hint">
+            Chưa có điểm nào. Nhấn nút "📍 Chấm điểm" trên thanh công cụ và nhấp vào mặt phẳng tọa độ Oxy để ghim điểm!
+          </div>
+        </div>
+      </div>
+
+      <!-- Properties / Results Card -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="icon">📊</span> <span id="txt-title-props">Đặc tính Hình học & Tọa độ</span></span>
+        </div>
+        <div class="prop-list" id="prop-list-container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Pedagogical Insight Card -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="icon">💡</span> <span id="txt-title-pedagogy">Phản hồi Sư phạm</span></span>
+        </div>
+        <div class="insight-box">
+          <div class="insight-title">
+            <span>🧠</span> <span id="insight-subtitle">Nhận xét tính chất hàm số</span>
+          </div>
+          <div class="insight-content" id="insight-text">
+            Đang tính toán...
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Table Card -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="icon">📋</span> <span id="txt-title-table">Bảng giá trị (x, y)</span></span>
+          <span class="badge-pill badge-blue" id="table-mode-badge">5 Điểm mẫu</span>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table" id="points-data-table">
+            <!-- populated dynamically -->
+          </table>
+        </div>
+      </div>
+
+      <!-- Quiz / Challenge Mode Card -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="icon">🎯</span> <span id="txt-title-challenge">Thử thách Toán 9</span></span>
+          <span class="badge-pill badge-purple" id="txt-challenge-level">Luyện tập</span>
+        </div>
+        <div class="challenge-box">
+          <div class="challenge-header">
+            <span class="challenge-title"><span>🏆</span> <span id="txt-lbl-choose-quest">Chọn nhiệm vụ:</span></span>
+          </div>
+          <select class="challenge-selector" id="challenge-select" onchange="onSelectChallenge(this.value)">
+            <!-- populated dynamically -->
+          </select>
+          <div class="challenge-desc" id="challenge-desc-text"></div>
+          <div class="challenge-actions">
+            <button class="btn-quiz btn-quiz-check" onclick="checkChallengeAnswer()">
+              <span>✓</span> <span id="txt-btn-check-quiz">Kiểm tra</span>
+            </button>
+            <button class="btn-quiz btn-quiz-hint" onclick="toggleChallengeHint()">
+              <span>💡</span> <span id="txt-btn-hint-quiz">Gợi ý</span>
+            </button>
+            <button class="btn-quiz btn-quiz-apply" onclick="applyChallengeSolution()">
+              <span>🎯</span> <span id="txt-btn-solve-quiz">Đáp án</span>
+            </button>
+          </div>
+          <div class="challenge-result" id="challenge-result-box"></div>
+          <div class="challenge-hint-text" id="challenge-hint-box"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Help / Guide Modal -->
+  <div class="modal-backdrop" id="help-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="txt-modal-guide-title">Hướng dẫn sử dụng Mô phỏng Đồ thị Lớp 9</h3>
+        <button class="btn-close" onclick="closeHelpModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-guide-body"></div>
+      <div style="text-align: right; margin-top: 0.5rem;">
+        <button class="btn-action btn-download" onclick="closeHelpModal()" id="txt-modal-btn-close">Đã hiểu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic (Vanilla JavaScript) -->
+  <script>
+    /**
+     * BILINGUAL DICTIONARY L = { vi: {...}, en: {...} }
+     */
+    const L = {
+      vi: {
+        appTitle: "Mô phỏng Đồ thị Hàm số Lớp 9",
+        appSubtitle: "Khảo sát, Kéo thả & Tương giao trực quan Oxy",
+        tabLinear: "Bậc nhất: y = ax + b",
+        tabQuadratic: "Bậc hai: y = ax² + bx + c",
+        tabIntersect: "Tương giao: (P) & (d)",
+        tabTwoParabolas: "2 Parabol: (P₁) & (P₂)",
+        btnLang: "VI / EN",
+        btnGuide: "Hướng dẫn",
+        btnDownload: "Tải index.html",
+        titleEquation: "Phương trình hàm số",
+        titleCoefficients: "Hệ số & Tham số",
+        titleMarkedPoints: "Điểm đánh dấu & Khảo sát",
+        btnResetCoef: "Mặc định",
+        titleProps: "Đặc tính Hình học & Tọa độ",
+        titlePedagogy: "Phản hồi Sư phạm",
+        titleTable: "Bảng giá trị (x, y)",
+        titleChallenge: "Thử thách Toán 9",
+        challengePractice: "Luyện tập",
+        chooseQuest: "Chọn nhiệm vụ:",
+        btnCheckQuiz: "Kiểm tra",
+        btnHintQuiz: "Gợi ý",
+        btnSolveQuiz: "Đáp án",
+        btnDragMode: "Kéo đồ thị",
+        btnMarkerMode: "Chấm điểm",
+        btnEraserMode: "Xóa điểm",
+        lblSliderRange: "Miền thanh trượt:",
+        btnPlotTable: "Chấm 5 điểm từ bảng",
+        btnClearPoints: "Xóa tất cả",
+        emptyPointsHint: "Chưa có điểm nào. Nhấn '📍 Chấm điểm' và nhấp lên Oxy để ghim điểm! (Bấm chuột phải hoặc nút 🧹 Xóa điểm để xóa)",
+        modalGuideTitle: "Hướng dẫn sử dụng Mô phỏng Đồ thị Lớp 9",
+        modalBtnClose: "Đã hiểu",
+        legendVertex: "Đỉnh I",
+        legendOy: "Giao điểm Oy",
+        legendOx: "Giao điểm Ox",
+        legendAxis: "Trục đối xứng",
+        legendParabola: "Parabol (P)",
+        legendLine: "Đường thẳng (d)",
+        legendP1: "Parabol (P₁)",
+        legendP2: "Parabol (P₂)",
+        legendIntersect: "Giao điểm / Tiếp điểm",
+        legendTarget: "Điểm mục tiêu",
+        legendMarked: "Điểm đánh dấu",
+        coefA: "Hệ số a",
+        coefB: "Hệ số b",
+        coefC: "Hệ số c",
+        subCoefALinear: "(hệ số góc)",
+        subCoefAQuad: "(bề lõm / co giãn)",
+        subCoefAParabola: "(parabol (P): y = ax²)",
+        subCoefBLinear: "(tung độ gốc)",
+        subCoefBQuad: "(tọa độ đỉnh)",
+        subCoefBIntersect: "(độ dốc (d): y = bx + c)",
+        subCoefC: "(giao điểm trục Oy)",
+        badgeLinear: "Hàm bậc nhất",
+        badgeQuad: "Hàm bậc hai",
+        badgeIntersect: "Tương giao (P) & (d)",
+        badgeTwoParabolas: "Tương giao 2 Parabol",
+        warnDegenerate: "⚠️ Chú ý: Khi a = 0, hàm số suy biến thành hàm bậc nhất y = bx + c (không còn là Parabol).",
+        propSlope: "Hệ số góc k",
+        propOy: "Giao điểm với Oy",
+        propOx: "Giao điểm với Ox",
+        propDelta: "Biệt thức Δ",
+        propVertex: "Tọa độ đỉnh I",
+        propAxis: "Trục đối xứng",
+        propInterEquation: "PT hoành độ giao điểm",
+        propInterDelta: "Biệt thức Δ tương giao",
+        propInterStatus: "Vị trí tương đối",
+        intersect2: "Cắt nhau tại 2 điểm phân biệt",
+        intersect1: "Tiếp xúc nhau (1 tiếp điểm duy nhất)",
+        intersect0: "Không giao nhau (vô nghiệm)",
+        modalContent: `
+          <p><strong>1. Kéo thả đồ thị trực tiếp (Mới):</strong></p>
+          <ul>
+            <li>Bật nút <strong>🖐️ Kéo đồ thị</strong> trên thanh công cụ.</li>
+            <li><strong>Parabol:</strong> Nhấp giữ kéo đỉnh <strong>I</strong> để dời Parabol tự do; kéo điểm điều khiển bề lõm để đổi độ dốc hệ số <strong>a</strong>.</li>
+            <li><strong>Đường thẳng:</strong> Kéo điểm cắt Oy hoặc kéo điểm trên đường thẳng để đổi hệ số góc và tung độ gốc.</li>
+          </ul>
+          <p style="margin-top:0.75rem;"><strong>2. Đánh dấu điểm & Kiểm tra điểm thuộc đồ thị (Mới):</strong></p>
+          <ul>
+            <li>Bật nút <strong>📍 Chấm điểm</strong>, nhấp chuột vào bất kỳ vị trí nào trên Oxy để tạo điểm đánh dấu.</li>
+            <li>Hệ thống tự động kiểm tra xem điểm có thỏa mãn phương trình hàm số hay không (hiển thị màu xanh lá nếu thuộc đồ thị).</li>
+            <li>Có thể bấm nút <em>"Chấm 5 điểm từ bảng"</em> để chiếu ngay 5 giá trị mẫu lên mặt phẳng.</li>
+          </ul>
+          <p style="margin-top:0.75rem;"><strong>3. Thêm đồ thị bậc 2 (2 Parabol):</strong></p>
+          <ul>
+            <li>Chuyển qua tab <strong>"2 Parabol: (P₁) & (P₂)"</strong> để so sánh cùng lúc 2 đồ thị bậc hai hoặc khảo sát sự tương giao giữa hai parabol.</li>
+          </ul>
+          <p style="margin-top:0.75rem;"><strong>4. Tự lưu trữ ngoại tuyến:</strong></p>
+          <ul>
+            <li>Bấm <strong>"Tải index.html"</strong> để có ngay 1 file chạy trực tiếp, lưu vào USB, trình chiếu không cần mạng!</li>
+          </ul>
+        `,
+        challenges: [
+          {
+            id: "1",
+            title: "Câu 1: Đường thẳng đi qua A(1, 3) và B(0, 1)",
+            desc: "Hãy điều chỉnh hệ số a và b (hoặc kéo trực tiếp trên đồ thị) sao cho đường thẳng y = ax + b đi qua A(1, 3) và B(0, 1).",
+            hint: "Thay x = 0, y = 1 vào hàm số được tung độ gốc b = 1. Thay x = 1, y = 3 vào: 3 = a*(1) + 1 => a = 2.",
+            mode: "linear",
+            solution: { a: 2, b: 1, c: 0 },
+            targets: [{ x: 1, y: 3, label: "A(1, 3)" }, { x: 0, y: 1, label: "B(0, 1)" }]
+          },
+          {
+            id: "2",
+            title: "Câu 2: Parabol có đỉnh I(1, -1) và đi qua gốc O(0, 0)",
+            desc: "Hãy điều chỉnh a, b, c sao cho Parabol y = ax² + bx + c có đỉnh I(1, -1) và đi qua gốc tọa độ O(0, 0).",
+            hint: "Đồ thị qua O(0,0) nên c = 0. Hoành độ đỉnh x_I = -b/(2a) = 1 => b = -2a. Tung độ đỉnh y_I = a(1)² + b(1) = -1 => a - 2a = -1 => a = 1, suy ra b = -2, c = 0.",
+            mode: "quadratic",
+            solution: { a: 1, b: -2, c: 0 },
+            targets: [{ x: 1, y: -1, label: "I(1, -1)" }, { x: 0, y: 0, label: "O(0, 0)" }]
+          },
+          {
+            id: "3",
+            title: "Câu 3: Đường thẳng tiếp xúc Parabol y = x² tại x = 2",
+            desc: "Giữ Parabol (P): y = x² (a = 1). Tìm đường thẳng y = bx + c tiếp xúc với (P) tại điểm có hoành độ x = 2.",
+            hint: "Tại x = 2 thì y = 2² = 4, tiếp điểm là M(2, 4). Hệ số góc tiếp tuyến là b = 2*a*x = 4. Phương trình x² - 4x - c = 0 có nghiệm kép x = 2 khi và chỉ khi c = -4.",
+            mode: "intersect",
+            solution: { a: 1, b: 4, c: -4 },
+            targets: [{ x: 2, y: 4, label: "M(2, 4) [Tiếp điểm]" }]
+          },
+          {
+            id: "4",
+            title: "Câu 4: So sánh 2 Parabol cắt nhau tại 2 điểm",
+            desc: "Điều chỉnh 2 Parabol (P₁) và (P₂) sao cho (P₁) mở lên (a₁ = 1, c₁ = 0) và (P₂) mở xuống (a₂ = -1, c₂ = 2).",
+            hint: "Phương trình hoành độ: x² = -x² + 2 ⇔ 2x² = 2 ⇔ x = ±1. Hai Parabol cắt nhau tại 2 điểm (-1, 1) và (1, 1).",
+            mode: "two-parabolas",
+            solution: { a: 1, b: 0, c: 0, a2: -1, b2: 0, c2: 2 },
+            targets: [{ x: 1, y: 1, label: "E(1, 1)" }, { x: -1, y: 1, label: "F(-1, 1)" }]
+          }
+        ]
+      },
+      en: {
+        appTitle: "Grade 9 Function Graph Interactive Simulator",
+        appSubtitle: "Direct Dragging, Custom Points & Dual Parabola Studio",
+        tabLinear: "Linear: y = ax + b",
+        tabQuadratic: "Quadratic: y = ax² + bx + c",
+        tabIntersect: "Intersection: (P) & (d)",
+        tabTwoParabolas: "2 Parabolas: (P₁) & (P₂)",
+        btnLang: "EN / VI",
+        btnGuide: "User Guide",
+        btnDownload: "Download index.html",
+        titleEquation: "Function Equation",
+        titleCoefficients: "Coefficients & Parameters",
+        titleMarkedPoints: "Marked Points & Validation",
+        btnResetCoef: "Reset",
+        titleProps: "Geometric Properties & Coordinates",
+        titlePedagogy: "Pedagogical Insights",
+        titleTable: "Data Table (x, y)",
+        titleChallenge: "Math Challenges",
+        challengePractice: "Practice",
+        chooseQuest: "Select Quest:",
+        btnCheckQuiz: "Check",
+        btnHintQuiz: "Hint",
+        btnSolveQuiz: "Solution",
+        btnDragMode: "Drag Graph",
+        btnMarkerMode: "Pin Point",
+        btnEraserMode: "Erase Point",
+        lblSliderRange: "Slider Range:",
+        btnPlotTable: "Plot 5 table points",
+        btnClearPoints: "Clear all",
+        emptyPointsHint: "No points pinned yet. Click '📍 Pin Point' to place points! (Right-click or use 🧹 Erase tool to delete)",
+        modalGuideTitle: "User Guide - Grade 9 Function Simulation",
+        modalBtnClose: "Got it",
+        legendVertex: "Vertex I",
+        legendOy: "Oy Intercept",
+        legendOx: "Ox Intercepts",
+        legendAxis: "Axis of Symmetry",
+        legendParabola: "Parabola (P)",
+        legendLine: "Line (d)",
+        legendP1: "Parabola (P₁)",
+        legendP2: "Parabola (P₂)",
+        legendIntersect: "Intersections / Tangent",
+        legendTarget: "Target Points",
+        legendMarked: "Marked Points",
+        coefA: "Coefficient a",
+        coefB: "Coefficient b",
+        coefC: "Coefficient c",
+        subCoefALinear: "(slope / gradient)",
+        subCoefAQuad: "(concavity / opening)",
+        subCoefAParabola: "(parabola (P): y = ax²)",
+        subCoefBLinear: "(y-intercept)",
+        subCoefBQuad: "(vertex shift)",
+        subCoefBIntersect: "(slope of (d): y = bx + c)",
+        subCoefC: "(y-axis intercept)",
+        badgeLinear: "Linear Function",
+        badgeQuad: "Quadratic Function",
+        badgeIntersect: "Intersection (P) & (d)",
+        badgeTwoParabolas: "Dual Parabolas",
+        warnDegenerate: "⚠️ Note: When a = 0, the quadratic function degenerates into a linear function y = bx + c.",
+        propSlope: "Slope k",
+        propOy: "Oy Intercept",
+        propOx: "Ox Intercepts",
+        propDelta: "Discriminant Δ",
+        propVertex: "Vertex I",
+        propAxis: "Axis of Symmetry",
+        propInterEquation: "Intersection Equation",
+        propInterDelta: "Intersection Discriminant Δ",
+        propInterStatus: "Relative Position",
+        intersect2: "Intersects at 2 distinct points",
+        intersect1: "Tangent to each other (1 common point)",
+        intersect0: "No intersection (0 common points)",
+        modalContent: `
+          <p><strong>1. Direct Interactive Dragging:</strong></p>
+          <ul>
+            <li>Toggle <strong>🖐️ Drag Graph</strong> on the toolbar.</li>
+            <li><strong>Parabola:</strong> Drag Vertex <strong>I</strong> to translate the parabola; drag the concavity handle to change <strong>a</strong>.</li>
+            <li><strong>Line:</strong> Drag the y-intercept or line handle to adjust slope and offset.</li>
+          </ul>
+          <p style="margin-top:0.75rem;"><strong>2. Mark Points & Belonging Test:</strong></p>
+          <ul>
+            <li>Click <strong>📍 Pin Point</strong>, then click anywhere on Oxy to place a point.</li>
+            <li>The system instantly validates if the point satisfies the current equation (green badge if on curve).</li>
+          </ul>
+          <p style="margin-top:0.75rem;"><strong>3. Dual Quadratic Curves (2 Parabolas):</strong></p>
+          <ul>
+            <li>Switch to <strong>"2 Parabolas: (P₁) & (P₂)"</strong> to compare two quadratic functions simultaneously!</li>
+          </ul>
+        `,
+        challenges: [
+          {
+            id: "1",
+            title: "Quest 1: Line passing through A(1, 3) and B(0, 1)",
+            desc: "Adjust coefficients a and b (or drag directly on graph) so that line y = ax + b passes through A(1, 3) and B(0, 1).",
+            hint: "At x = 0, y = 1 => b = 1. At x = 1, y = 3 => 3 = a(1) + 1 => a = 2.",
+            mode: "linear",
+            solution: { a: 2, b: 1, c: 0 },
+            targets: [{ x: 1, y: 3, label: "A(1, 3)" }, { x: 0, y: 1, label: "B(0, 1)" }]
+          },
+          {
+            id: "2",
+            title: "Quest 2: Parabola with Vertex I(1, -1) passing through O(0, 0)",
+            desc: "Adjust a, b, c so that Parabola y = ax² + bx + c has vertex I(1, -1) and passes through origin O(0, 0).",
+            hint: "Passing through O(0,0) gives c = 0. Vertex at x = 1 => -b/(2a) = 1 => b = -2a. Value at x = 1 is y = -1 => a - 2a = -1 => a = 1, b = -2, c = 0.",
+            mode: "quadratic",
+            solution: { a: 1, b: -2, c: 0 },
+            targets: [{ x: 1, y: -1, label: "I(1, -1)" }, { x: 0, y: 0, label: "O(0, 0)" }]
+          },
+          {
+            id: "3",
+            title: "Quest 3: Line tangent to Parabola y = x² at x = 2",
+            desc: "Keep Parabola y = x² (a = 1). Adjust line y = bx + c to be tangent to (P) at x = 2.",
+            hint: "At x = 2, y = 4. Tangent line at (2, 4) has slope b = 2*a*x = 4. Equation x² - 4x - c = 0 has double root at x = 2 => c = -4.",
+            mode: "intersect",
+            solution: { a: 1, b: 4, c: -4 },
+            targets: [{ x: 2, y: 4, label: "M(2, 4) [Tangent]" }]
+          },
+          {
+            id: "4",
+            title: "Quest 4: Two Parabolas intersecting at 2 points",
+            desc: "Set (P₁) opening up (a₁ = 1, c₁ = 0) and (P₂) opening down (a₂ = -1, c₂ = 2).",
+            hint: "Solve x² = -x² + 2 => 2x² = 2 => x = ±1.",
+            mode: "two-parabolas",
+            solution: { a: 1, b: 0, c: 0, a2: -1, b2: 0, c2: 2 },
+            targets: [{ x: 1, y: 1, label: "E(1, 1)" }, { x: -1, y: 1, label: "F(-1, 1)" }]
+          }
+        ]
+      }
+    };
+
+    /**
+     * STATE MANAGEMENT
+     */
+    let currentLang = 'vi';
+    let currentMode = 'linear'; // 'linear' | 'quadratic' | 'intersect' | 'two-parabolas'
+
+    // Parameters for Graph 1
+    let params = {
+      a: 1.0,
+      b: 0.0,
+      c: 0.0
+    };
+
+    // Parameters for Graph 2 (Quadratic 2 for dual parabola mode)
+    let params2 = {
+      a: -1.0,
+      b: 0.0,
+      c: 2.0
+    };
+
+    let activeParabolaEdit = 1; // 1 or 2 (in dual parabola mode)
+
+    // Interactive modes
+    let isDirectDragEnabled = true;
+    let isMarkerToolActive = false;
+    let isEraserToolActive = false;
+    let currentSliderBound = 5;
+
+    // Custom Marked Points
+    let customMarkedPoints = []; // [{ id, name, x, y }]
+
+    // Viewport transform
+    const viewport = {
+      offsetX: 0,
+      offsetY: 0,
+      scale: 45,
+      showGrid: true,
+      isPanning: false,
+      panStartX: 0,
+      panStartY: 0,
+      mouseMathX: null,
+      mouseMathY: null,
+      mouseScreenX: null,
+      mouseScreenY: null,
+      hoverActive: false
+    };
+
+    // Dragging control points on graph
+    let activeDragHandle = null; // null | { type: 'vertex'|'curvature'|'line_b'|'line_slope'|'custom_point', id?, mathX?, mathY? }
+
+    let activeChallengeIndex = 0;
+    let challengeHintVisible = false;
+
+    // DOM References
+    const canvas = document.getElementById('graph-canvas');
+    const ctx = canvas.getContext('2d');
+    const canvasWrapper = document.getElementById('canvas-wrapper');
+    const cursorBadge = document.getElementById('cursor-badge');
+    const canvasHintText = document.getElementById('canvas-hint-text');
+
+    /**
+     * INITIALIZATION
+     */
+    window.addEventListener('DOMContentLoaded', () => {
+      initCanvasSize();
+      window.addEventListener('resize', () => {
+        initCanvasSize();
+        drawGraph();
+      });
+
+      setupCanvasEvents();
+      updateLanguageUI();
+      switchMode('linear');
+    });
+
+    function initCanvasSize() {
+      const rect = canvasWrapper.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.resetTransform && ctx.resetTransform();
+      ctx.scale(dpr, dpr);
+    }
+
+    /**
+     * LANGUAGE SWITCHING
+     */
+    function toggleLanguage() {
+      currentLang = (currentLang === 'vi') ? 'en' : 'vi';
+      updateLanguageUI();
+      renderAll();
+    }
+
+    function updateLanguageUI() {
+      const t = L[currentLang];
+      document.title = t.appTitle;
+      document.getElementById('txt-app-title').textContent = t.appTitle;
+      document.getElementById('txt-app-subtitle').textContent = t.appSubtitle;
+      document.getElementById('txt-tab-linear').textContent = t.tabLinear;
+      document.getElementById('txt-tab-quadratic').textContent = t.tabQuadratic;
+      document.getElementById('txt-tab-intersect').textContent = t.tabIntersect;
+      document.getElementById('txt-tab-two-parabolas').textContent = t.tabTwoParabolas;
+      document.getElementById('txt-btn-lang').textContent = t.btnLang;
+      document.getElementById('txt-btn-guide').textContent = t.btnGuide;
+      document.getElementById('txt-btn-download').textContent = t.btnDownload;
+      document.getElementById('txt-btn-drag-mode').textContent = t.btnDragMode;
+      document.getElementById('txt-btn-marker-mode').textContent = t.btnMarkerMode;
+      document.getElementById('txt-btn-eraser-mode').textContent = t.btnEraserMode;
+      document.getElementById('txt-lbl-slider-range').textContent = t.lblSliderRange;
+      document.getElementById('txt-title-equation').textContent = t.titleEquation;
+      document.getElementById('txt-title-coefficients').textContent = t.titleCoefficients;
+      document.getElementById('txt-title-marked-points').textContent = t.titleMarkedPoints;
+      document.getElementById('txt-btn-plot-table').textContent = t.btnPlotTable;
+      document.getElementById('txt-btn-clear-points').textContent = t.btnClearPoints;
+      document.getElementById('txt-btn-reset-coef').textContent = t.btnResetCoef;
+      document.getElementById('txt-title-props').textContent = t.titleProps;
+      document.getElementById('txt-title-pedagogy').textContent = t.titlePedagogy;
+      document.getElementById('txt-title-table').textContent = t.titleTable;
+      document.getElementById('txt-title-challenge').textContent = t.titleChallenge;
+      document.getElementById('txt-challenge-level').textContent = t.challengePractice;
+      document.getElementById('txt-lbl-choose-quest').textContent = t.chooseQuest;
+      document.getElementById('txt-btn-check-quiz').textContent = t.btnCheckQuiz;
+      document.getElementById('txt-btn-hint-quiz').textContent = t.btnHintQuiz;
+      document.getElementById('txt-btn-solve-quiz').textContent = t.btnSolveQuiz;
+      document.getElementById('txt-modal-guide-title').textContent = t.modalGuideTitle;
+      document.getElementById('txt-modal-btn-close').textContent = t.modalBtnClose;
+      document.getElementById('modal-guide-body').innerHTML = t.modalContent;
+
+      // Update challenge selector
+      const sel = document.getElementById('challenge-select');
+      sel.innerHTML = '';
+      t.challenges.forEach((ch, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = ch.title;
+        sel.appendChild(opt);
+      });
+      sel.value = activeChallengeIndex;
+      updateChallengeCard();
+      renderCustomPointsList();
+    }
+
+    /**
+     * MODE SWITCHING
+     */
+    function switchMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById('tab-' + mode);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const t = L[currentLang];
+      const badge = document.getElementById('badge-mode');
+      const groupA = document.getElementById('group-param-a');
+      const groupB = document.getElementById('group-param-b');
+      const groupC = document.getElementById('group-param-c');
+      const p2SelectRow = document.getElementById('parabola-select-row');
+
+      const labelA = document.getElementById('label-coef-a');
+      const subA = document.getElementById('sub-coef-a');
+      const labelB = document.getElementById('label-coef-b');
+      const subB = document.getElementById('sub-coef-b');
+      const labelC = document.getElementById('label-coef-c');
+      const subC = document.getElementById('sub-coef-c');
+
+      p2SelectRow.style.display = (mode === 'two-parabolas') ? 'flex' : 'none';
+
+      if (mode === 'linear') {
+        badge.textContent = t.badgeLinear;
+        badge.className = 'badge-pill badge-blue';
+        groupA.style.display = 'flex';
+        groupB.style.display = 'flex';
+        groupC.style.display = 'none';
+
+        labelA.textContent = t.coefA;
+        subA.textContent = t.subCoefALinear;
+        labelB.textContent = t.coefB;
+        subB.textContent = t.subCoefBLinear;
+
+        if (params.a === 0 && params.b === 0) {
+          params.a = 1.0;
+          params.b = 1.0;
+        }
+      } else if (mode === 'quadratic') {
+        badge.textContent = t.badgeQuad;
+        badge.className = 'badge-pill badge-green';
+        groupA.style.display = 'flex';
+        groupB.style.display = 'flex';
+        groupC.style.display = 'flex';
+
+        labelA.textContent = t.coefA;
+        subA.textContent = t.subCoefAQuad;
+        labelB.textContent = t.coefB;
+        subB.textContent = t.subCoefBQuad;
+        labelC.textContent = t.coefC;
+        subC.textContent = t.subCoefC;
+
+        if (params.a === 0) params.a = 1.0;
+      } else if (mode === 'intersect') {
+        badge.textContent = t.badgeIntersect;
+        badge.className = 'badge-pill badge-purple';
+        groupA.style.display = 'flex';
+        groupB.style.display = 'flex';
+        groupC.style.display = 'flex';
+
+        labelA.textContent = `${t.coefA} (P)`;
+        subA.textContent = t.subCoefAParabola;
+        labelB.textContent = `${t.coefB} (d)`;
+        subB.textContent = t.subCoefBIntersect;
+        labelC.textContent = `${t.coefC} (d)`;
+        subC.textContent = t.subCoefC;
+
+        if (params.a === 0) params.a = 1.0;
+      } else if (mode === 'two-parabolas') {
+        badge.textContent = t.badgeTwoParabolas;
+        badge.className = 'badge-pill badge-pink';
+        groupA.style.display = 'flex';
+        groupB.style.display = 'flex';
+        groupC.style.display = 'flex';
+
+        updateDualParabolaLabels();
+      }
+
+      updateInputsUI();
+      renderAll();
+    }
+
+    function selectParabolaEdit(num) {
+      activeParabolaEdit = num;
+      document.getElementById('btn-sel-p1').classList.toggle('active', num === 1);
+      document.getElementById('btn-sel-p2').classList.toggle('active', num === 2);
+      updateDualParabolaLabels();
+      updateInputsUI();
+      renderAll();
+    }
+
+    function updateDualParabolaLabels() {
+      const t = L[currentLang];
+      const pNum = activeParabolaEdit === 1 ? '₁' : '₂';
+      document.getElementById('label-coef-a').textContent = `Hệ số a${pNum}`;
+      document.getElementById('sub-coef-a').textContent = activeParabolaEdit === 1 ? '(Parabol P₁)' : '(Parabol P₂)';
+      document.getElementById('label-coef-b').textContent = `Hệ số b${pNum}`;
+      document.getElementById('sub-coef-b').textContent = '(tọa độ đỉnh)';
+      document.getElementById('label-coef-c').textContent = `Hệ số c${pNum}`;
+      document.getElementById('sub-coef-c').textContent = '(giao điểm Oy)';
+    }
+
+    /**
+     * COEFFICIENT CONTROLS
+     */
+    function getActiveParams() {
+      if (currentMode === 'two-parabolas' && activeParabolaEdit === 2) {
+        return params2;
+      }
+      return params;
+    }
+
+    function setSliderRange(maxVal) {
+      currentSliderBound = maxVal;
+      ['a', 'b', 'c'].forEach(k => {
+        const slider = document.getElementById('slider-' + k);
+        if (slider) {
+          slider.min = -maxVal;
+          slider.max = maxVal;
+          slider.step = maxVal > 20 ? "0.5" : "0.1";
+        }
+      });
+      [5, 10, 25, 50].forEach(n => {
+        const btn = document.getElementById('btn-range-' + n);
+        if (btn) btn.classList.toggle('active', n === maxVal);
+      });
+      updateInputsUI();
+    }
+
+    function autoExpandSlider(param, val) {
+      const slider = document.getElementById('slider-' + param);
+      if (!slider) return;
+      const absVal = Math.abs(val);
+      if (absVal > currentSliderBound) {
+        const newBound = Math.ceil(absVal / 5) * 5 + 5;
+        setSliderRange(newBound);
+      }
+    }
+
+    function onSliderChange(param, val) {
+      const p = getActiveParams();
+      p[param] = parseFloat(val);
+      syncControlUI(param, true);
+      renderAll();
+    }
+
+    function onNumberChange(param, val) {
+      if (val === '' || val === '-' || val === '+') return;
+      let num = parseFloat(val);
+      if (isNaN(num)) return;
+      const p = getActiveParams();
+      p[param] = parseFloat(num.toFixed(4));
+      autoExpandSlider(param, num);
+      syncControlUI(param, false);
+      renderAll();
+    }
+
+    function setCoef(param, val) {
+      const p = getActiveParams();
+      p[param] = parseFloat(val);
+      autoExpandSlider(param, val);
+      syncControlUI(param, true);
+      renderAll();
+    }
+
+    function resetCoefficients() {
+      setSliderRange(5);
+      if (currentMode === 'linear') {
+        params.a = 1.0;
+        params.b = 0.0;
+        params.c = 0.0;
+      } else if (currentMode === 'quadratic') {
+        params.a = 1.0;
+        params.b = -2.0;
+        params.c = -1.0;
+      } else if (currentMode === 'intersect') {
+        params.a = 1.0;
+        params.b = 1.0;
+        params.c = 2.0;
+      } else {
+        params.a = 1.0;
+        params.b = 0.0;
+        params.c = 0.0;
+        params2.a = -1.0;
+        params2.b = 0.0;
+        params2.c = 2.0;
+      }
+      updateInputsUI();
+      renderAll();
+    }
+
+    function syncControlUI(pKey, updateInputText = true) {
+      const p = getActiveParams();
+      const v = p[pKey];
+      const slider = document.getElementById('slider-' + pKey);
+      if (slider) {
+        slider.value = v;
+      }
+      if (updateInputText) {
+        const numInput = document.getElementById('num-' + pKey);
+        if (numInput && document.activeElement !== numInput) {
+          numInput.value = formatNumber(v, 3);
+        }
+      }
+      const disp = document.getElementById('val-display-' + pKey);
+      if (disp) disp.textContent = formatNumber(v, 2);
+    }
+
+    function updateInputsUI() {
+      ['a', 'b', 'c'].forEach(k => syncControlUI(k, true));
+    }
+
+    /**
+     * MATH HELPERS & FORMATTING
+     */
+    function formatNumber(n, decimals = 2) {
+      if (Math.abs(n) < 1e-9) return "0";
+      const s = n.toFixed(decimals);
+      return s.replace(/\.?0+$/, "");
+    }
+
+    function formatLinearEquation(a, b) {
+      if (Math.abs(a) < 1e-9 && Math.abs(b) < 1e-9) return "y = 0";
+      let res = "y = ";
+      if (Math.abs(a) > 1e-9) {
+        if (a === 1) res += "x";
+        else if (a === -1) res += "-x";
+        else res += `${formatNumber(a)}x`;
+
+        if (b > 1e-9) res += ` + ${formatNumber(b)}`;
+        else if (b < -1e-9) res += ` - ${formatNumber(Math.abs(b))}`;
+      } else {
+        res += formatNumber(b);
+      }
+      return res;
+    }
+
+    function formatQuadraticEquation(a, b, c) {
+      if (Math.abs(a) < 1e-9) {
+        return formatLinearEquation(b, c);
+      }
+      let res = "y = ";
+      if (a === 1) res += "x²";
+      else if (a === -1) res += "-x²";
+      else res += `${formatNumber(a)}x²`;
+
+      if (b > 1e-9) {
+        res += (b === 1) ? " + x" : ` + ${formatNumber(b)}x`;
+      } else if (b < -1e-9) {
+        res += (b === -1) ? " - x" : ` - ${formatNumber(Math.abs(b))}x`;
+      }
+
+      if (c > 1e-9) res += ` + ${formatNumber(c)}`;
+      else if (c < -1e-9) res += ` - ${formatNumber(Math.abs(c))}`;
+
+      return res;
+    }
+
+    // Function evaluate helper
+    function evaluateMainFunction(x) {
+      if (currentMode === 'linear') {
+        return params.a * x + params.b;
+      } else if (currentMode === 'quadratic') {
+        return params.a * x * x + params.b * x + params.c;
+      } else if (currentMode === 'intersect') {
+        return params.a * x * x; // Parabola P
+      } else {
+        return params.a * x * x + params.b * x + params.c;
+      }
+    }
+
+    /**
+     * INTERACTIVE DIRECT MANIPULATION & MARKER TOGGLES
+     */
+    function toggleDirectDragMode() {
+      isDirectDragEnabled = !isDirectDragEnabled;
+      const btn = document.getElementById('btn-toggle-drag');
+      btn.classList.toggle('active', isDirectDragEnabled);
+      updateCanvasHint();
+      drawGraph();
+    }
+
+    function toggleMarkerMode() {
+      isMarkerToolActive = !isMarkerToolActive;
+      if (isMarkerToolActive) {
+        isEraserToolActive = false;
+        const eBtn = document.getElementById('btn-toggle-eraser');
+        if (eBtn) eBtn.classList.remove('active-marker');
+      }
+      const btn = document.getElementById('btn-toggle-marker');
+      btn.classList.toggle('active-marker', isMarkerToolActive);
+      canvas.classList.toggle('cursor-marker', isMarkerToolActive);
+      canvas.classList.remove('cursor-eraser');
+      updateCanvasHint();
+    }
+
+    function toggleEraserMode() {
+      isEraserToolActive = !isEraserToolActive;
+      if (isEraserToolActive) {
+        isMarkerToolActive = false;
+        const mBtn = document.getElementById('btn-toggle-marker');
+        if (mBtn) mBtn.classList.remove('active-marker');
+      }
+      const btn = document.getElementById('btn-toggle-eraser');
+      btn.classList.toggle('active-marker', isEraserToolActive);
+      canvas.classList.toggle('cursor-eraser', isEraserToolActive);
+      canvas.classList.remove('cursor-marker');
+      updateCanvasHint();
+    }
+
+    function updateCanvasHint(customMessage) {
+      if (customMessage) {
+        canvasHintText.textContent = customMessage;
+        return;
+      }
+      if (isEraserToolActive) {
+        canvasHintText.textContent = (currentLang === 'vi')
+          ? "🧹 Chế độ xóa điểm: Nhấp vào bất kỳ điểm nào trên Oxy để xóa!"
+          : "🧹 Erase Point Mode: Click any point on Oxy to delete it!";
+      } else if (isMarkerToolActive) {
+        canvasHintText.textContent = (currentLang === 'vi')
+          ? "📍 Chế độ chấm điểm: Nhấp chuột lên Oxy để ghim điểm mới!"
+          : "📍 Pin Point Mode: Click on Oxy to place a new point!";
+      } else if (isDirectDragEnabled) {
+        canvasHintText.textContent = (currentLang === 'vi')
+          ? "🖐️ Kéo đỉnh I hoặc các điểm điều khiển tròn để thay đổi trực tiếp đồ thị! (Bấm chuột phải lên điểm để xóa)"
+          : "🖐️ Drag Vertex I or circle handles to reshape the graph! (Right-click point to delete)";
+      } else {
+        canvasHintText.textContent = (currentLang === 'vi')
+          ? "Rê chuột kiểm tra tọa độ | Kéo mặt phẳng để di chuyển (Pan)"
+          : "Hover to inspect coords | Drag background to Pan Oxy";
+      }
+    }
+
+    /**
+     * CUSTOM MARKED POINTS MANAGEMENT
+     */
+    function addCustomPoint(x, y) {
+      const nextLetter = String.fromCharCode(65 + (customMarkedPoints.length % 26)); // A, B, C...
+      const id = Date.now() + Math.random();
+      const pt = {
+        id,
+        name: `${nextLetter}${customMarkedPoints.length >= 26 ? Math.floor(customMarkedPoints.length/26) : ''}`,
+        x: parseFloat(x.toFixed(2)),
+        y: parseFloat(y.toFixed(2))
+      };
+      customMarkedPoints.push(pt);
+      renderCustomPointsList();
+      drawGraph();
+    }
+
+    function addPointFromTable() {
+      const sampleX = [-2, -1, 0, 1, 2];
+      sampleX.forEach((x, i) => {
+        const y = evaluateMainFunction(x);
+        const name = `P_${i + 1}`;
+        // avoid duplicate coordinates
+        if (!customMarkedPoints.some(p => Math.abs(p.x - x) < 0.05 && Math.abs(p.y - y) < 0.05)) {
+          customMarkedPoints.push({
+            id: Date.now() + i + Math.random(),
+            name,
+            x: parseFloat(x.toFixed(2)),
+            y: parseFloat(y.toFixed(2))
+          });
+        }
+      });
+      renderCustomPointsList();
+      drawGraph();
+    }
+
+    function removeCustomPoint(id) {
+      customMarkedPoints = customMarkedPoints.filter(p => p.id !== id);
+      renderCustomPointsList();
+      drawGraph();
+    }
+
+    function clearCustomPoints() {
+      customMarkedPoints = [];
+      renderCustomPointsList();
+      drawGraph();
+    }
+
+    function checkPointBelongsToGraph(x, y) {
+      const expectedY = evaluateMainFunction(x);
+      const diff = Math.abs(y - expectedY);
+      return diff < 0.08;
+    }
+
+    function renderCustomPointsList() {
+      const container = document.getElementById('marked-points-container');
+      const badge = document.getElementById('marked-count-badge');
+      badge.textContent = `${customMarkedPoints.length} ${currentLang === 'vi' ? 'điểm' : 'pts'}`;
+
+      if (customMarkedPoints.length === 0) {
+        container.innerHTML = `<div style="font-size:0.75rem; color:#94a3b8; font-style:italic;">${L[currentLang].emptyPointsHint}</div>`;
+        return;
+      }
+
+      let html = '';
+      customMarkedPoints.forEach(pt => {
+        const belongs = checkPointBelongsToGraph(pt.x, pt.y);
+        const statusBadge = belongs
+          ? `<span class="badge-pill badge-green" style="font-size:0.68rem;">∈ Đồ thị</span>`
+          : `<span class="badge-pill badge-orange" style="font-size:0.68rem;">∉ Đồ thị</span>`;
+
+        html += `
+          <div class="marked-point-item">
+            <div class="marked-point-info">
+              <span style="color:#7c3aed; font-weight:700;">${pt.name}</span>
+              <span>(${formatNumber(pt.x)}; ${formatNumber(pt.y)})</span>
+              ${statusBadge}
+            </div>
+            <button class="btn-del-point" onclick="removeCustomPoint(${pt.id})" title="Xóa điểm này" style="color:#ef4444; font-weight:700; padding:0.15rem 0.45rem; border:1px solid #fecaca; border-radius:0.35rem; background:#fef2f2; font-size:0.75rem; cursor:pointer; display:flex; align-items:center; gap:0.25rem;">
+              <span>🗑️</span> <span>${currentLang === 'vi' ? 'Xóa' : 'Del'}</span>
+            </button>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    /**
+     * RENDER ALL UPDATES
+     */
+    function renderAll() {
+      updateEquationBanner();
+      updatePropertiesCard();
+      updatePedagogicalInsights();
+      updateDataTable();
+      updateLegendUI();
+      renderCustomPointsList();
+      drawGraph();
+    }
+
+    function updateEquationBanner() {
+      const banner = document.getElementById('banner-equation');
+      const warn = document.getElementById('banner-warning');
+      const t = L[currentLang];
+
+      if (currentMode === 'linear') {
+        banner.innerHTML = formatLinearEquation(params.a, params.b);
+        warn.style.display = 'none';
+      } else if (currentMode === 'quadratic') {
+        banner.innerHTML = formatQuadraticEquation(params.a, params.b, params.c);
+        if (Math.abs(params.a) < 1e-9) {
+          warn.innerHTML = t.warnDegenerate;
+          warn.style.display = 'block';
+        } else {
+          warn.style.display = 'none';
+        }
+      } else if (currentMode === 'intersect') {
+        const pEq = (params.a === 1) ? "y = x²" : (params.a === -1 ? "y = -x²" : `y = ${formatNumber(params.a)}x²`);
+        const dEq = formatLinearEquation(params.b, params.c);
+        banner.innerHTML = `<span style="color:#2563eb;">(P): ${pEq}</span> &nbsp;|&nbsp; <span style="color:#e11d48;">(d): ${dEq}</span>`;
+        warn.style.display = 'none';
+      } else {
+        // Two parabolas mode
+        const p1Eq = formatQuadraticEquation(params.a, params.b, params.c);
+        const p2Eq = formatQuadraticEquation(params2.a, params2.b, params2.c);
+        banner.innerHTML = `<span style="color:#2563eb;">(P₁): ${p1Eq}</span><br><span style="color:#f59e0b;">(P₂): ${p2Eq}</span>`;
+        warn.style.display = 'none';
+      }
+    }
+
+    function updatePropertiesCard() {
+      const container = document.getElementById('prop-list-container');
+      const t = L[currentLang];
+      let html = '';
+
+      if (currentMode === 'linear') {
+        const a = params.a;
+        const b = params.b;
+        const slopeType = a > 0 ? (currentLang === 'vi' ? 'Đồng biến (a > 0)' : 'Increasing')
+                        : a < 0 ? (currentLang === 'vi' ? 'Nghịch biến (a < 0)' : 'Decreasing')
+                        : (currentLang === 'vi' ? 'Hàm hằng (a = 0)' : 'Constant');
+        const slopeBadge = a > 0 ? 'badge-green' : (a < 0 ? 'badge-orange' : 'badge-blue');
+
+        html += `
+          <div class="prop-item">
+            <span class="prop-label"><span>📐</span> ${t.propSlope} (a):</span>
+            <span class="prop-value">${formatNumber(a)} <span class="badge-pill ${slopeBadge}">${slopeType}</span></span>
+          </div>
+          <div class="prop-item">
+            <span class="prop-label"><span>🎯</span> ${t.propOy} (x = 0):</span>
+            <span class="prop-value" style="color:#f59e0b;">(0; ${formatNumber(b)})</span>
+          </div>
+        `;
+
+        if (Math.abs(a) > 1e-9) {
+          const rootX = -b / a;
+          html += `
+            <div class="prop-item">
+              <span class="prop-label"><span>🌱</span> ${t.propOx} (y = 0):</span>
+              <span class="prop-value" style="color:#10b981;">(${formatNumber(rootX)}; 0)</span>
+            </div>
+          `;
+        }
+      } else if (currentMode === 'quadratic') {
+        const a = params.a;
+        const b = params.b;
+        const c = params.c;
+
+        if (Math.abs(a) < 1e-9) {
+          html += `
+            <div class="prop-item">
+              <span class="prop-label"><span>⚠️</span> Trạng thái:</span>
+              <span class="prop-value"><span class="badge-pill badge-red">${currentLang === 'vi' ? 'Suy biến thành đường thẳng' : 'Degenerated'}</span></span>
+            </div>
+          `;
+        } else {
+          const delta = b * b - 4 * a * c;
+          const xVertex = -b / (2 * a);
+          const yVertex = -delta / (4 * a);
+          const vertexBadge = a > 0 ? (currentLang === 'vi' ? 'Cực tiểu' : 'Minimum') : (currentLang === 'vi' ? 'Cực đại' : 'Maximum');
+
+          html += `
+            <div class="prop-item">
+              <span class="prop-label"><span>📍</span> ${t.propVertex} I:</span>
+              <span class="prop-value" style="color:#ef4444;">(${formatNumber(xVertex)}; ${formatNumber(yVertex)}) <span class="badge-pill ${a > 0 ? 'badge-blue' : 'badge-orange'}">${vertexBadge}</span></span>
+            </div>
+            <div class="prop-item">
+              <span class="prop-label"><span>⇥</span> ${t.propAxis}:</span>
+              <span class="prop-value" style="color:#6366f1;">x = ${formatNumber(xVertex)}</span>
+            </div>
+            <div class="prop-item">
+              <span class="prop-label"><span>Δ</span> ${t.propDelta}:</span>
+              <span class="prop-value">${formatNumber(delta)} <span class="badge-pill ${delta > 0 ? 'badge-green' : (delta === 0 ? 'badge-blue' : 'badge-red')}">${delta > 0 ? 'Δ > 0' : (delta === 0 ? 'Δ = 0' : 'Δ < 0')}</span></span>
+            </div>
+            <div class="prop-item">
+              <span class="prop-label"><span>🎯</span> ${t.propOy} (0, c):</span>
+              <span class="prop-value" style="color:#f59e0b;">(0; ${formatNumber(c)})</span>
+            </div>
+          `;
+
+          if (delta > 0) {
+            const x1 = (-b - Math.sqrt(delta)) / (2 * a);
+            const x2 = (-b + Math.sqrt(delta)) / (2 * a);
+            html += `
+              <div class="prop-item">
+                <span class="prop-label"><span>🌱</span> ${t.propOx} (2 nghiệm):</span>
+                <span class="prop-value" style="color:#10b981;">x₁=${formatNumber(x1)}, x₂=${formatNumber(x2)}</span>
+              </div>
+            `;
+          }
+        }
+      } else if (currentMode === 'intersect') {
+        const a = params.a;
+        const b = params.b;
+        const c = params.c;
+        const delta = b * b + 4 * a * c;
+
+        html += `
+          <div class="prop-item">
+            <span class="prop-label"><span>🔀</span> ${t.propInterEquation}:</span>
+            <span class="prop-value">${formatNumber(a)}x² ${b >= 0 ? '- ' + formatNumber(b) : '+ ' + formatNumber(Math.abs(b))}x ${c >= 0 ? '- ' + formatNumber(c) : '+ ' + formatNumber(Math.abs(c))} = 0</span>
+          </div>
+          <div class="prop-item">
+            <span class="prop-label"><span>Δ</span> ${t.propInterDelta}:</span>
+            <span class="prop-value">${formatNumber(delta)}</span>
+          </div>
+        `;
+
+        if (delta > 0) {
+          const x1 = (b - Math.sqrt(delta)) / (2 * a);
+          const y1 = a * x1 * x1;
+          const x2 = (b + Math.sqrt(delta)) / (2 * a);
+          const y2 = a * x2 * x2;
+          html += `
+            <div class="prop-item">
+              <span class="prop-label"><span>📍</span> ${t.propInterStatus}:</span>
+              <span class="prop-value"><span class="badge-pill badge-green">${t.intersect2}</span></span>
+            </div>
+            <div class="prop-item">
+              <span class="prop-label"><span>🔹</span> A: (${formatNumber(x1)}; ${formatNumber(y1)})</span>
+              <span class="prop-label"><span>🔹</span> B: (${formatNumber(x2)}; ${formatNumber(y2)})</span>
+            </div>
+          `;
+        } else if (Math.abs(delta) < 1e-9) {
+          const x0 = b / (2 * a);
+          const y0 = a * x0 * x0;
+          html += `
+            <div class="prop-item">
+              <span class="prop-label"><span>📍</span> Tiếp điểm M:</span>
+              <span class="prop-value" style="color:#8b5cf6;">(${formatNumber(x0)}; ${formatNumber(y0)})</span>
+            </div>
+          `;
+        }
+      } else {
+        // Mode 4: 2 Parabolas
+        // (a1 - a2)x^2 + (b1 - b2)x + (c1 - c2) = 0
+        const da = params.a - params2.a;
+        const db = params.b - params2.b;
+        const dc = params.c - params2.c;
+
+        html += `
+          <div class="prop-item">
+            <span class="prop-label"><span>📍</span> Đỉnh I₁ (P₁):</span>
+            <span class="prop-value" style="color:#2563eb;">(${formatNumber(-params.b/(2*params.a))}; ${formatNumber(-(params.b*params.b - 4*params.a*params.c)/(4*params.a))})</span>
+          </div>
+          <div class="prop-item">
+            <span class="prop-label"><span>📍</span> Đỉnh I₂ (P₂):</span>
+            <span class="prop-value" style="color:#f59e0b;">(${formatNumber(-params2.b/(2*params2.a))}; ${formatNumber(-(params2.b*params2.b - 4*params2.a*params2.c)/(4*params2.a))})</span>
+          </div>
+        `;
+
+        if (Math.abs(da) < 1e-9) {
+          if (Math.abs(db) > 1e-9) {
+            const xCross = -dc / db;
+            const yCross = params.a * xCross * xCross + params.b * xCross + params.c;
+            html += `
+              <div class="prop-item">
+                <span class="prop-label"><span>🔹</span> Cắt tại 1 điểm:</span>
+                <span class="prop-value" style="color:#ec4899;">(${formatNumber(xCross)}; ${formatNumber(yCross)})</span>
+              </div>
+            `;
+          }
+        } else {
+          const dDelta = db * db - 4 * da * dc;
+          html += `
+            <div class="prop-item">
+              <span class="prop-label"><span>Δ</span> Tương giao 2P:</span>
+              <span class="prop-value">${formatNumber(dDelta)}</span>
+            </div>
+          `;
+          if (dDelta > 0) {
+            const x1 = (-db - Math.sqrt(dDelta)) / (2 * da);
+            const y1 = params.a * x1 * x1 + params.b * x1 + params.c;
+            const x2 = (-db + Math.sqrt(dDelta)) / (2 * da);
+            const y2 = params.a * x2 * x2 + params.b * x2 + params.c;
+            html += `
+              <div class="prop-item">
+                <span class="prop-label"><span>🔹</span> Giao điểm 1:</span>
+                <span class="prop-value" style="color:#ec4899;">(${formatNumber(x1)}; ${formatNumber(y1)})</span>
+              </div>
+              <div class="prop-item">
+                <span class="prop-label"><span>🔹</span> Giao điểm 2:</span>
+                <span class="prop-value" style="color:#ec4899;">(${formatNumber(x2)}; ${formatNumber(y2)})</span>
+              </div>
+            `;
+          } else if (Math.abs(dDelta) < 1e-9) {
+            const x0 = -db / (2 * da);
+            const y0 = params.a * x0 * x0 + params.b * x0 + params.c;
+            html += `
+              <div class="prop-item">
+                <span class="prop-label"><span>🔸</span> Tiếp xúc tại:</span>
+                <span class="prop-value" style="color:#ec4899;">(${formatNumber(x0)}; ${formatNumber(y0)})</span>
+              </div>
+            `;
+          }
+        }
+      }
+
+      container.innerHTML = html;
+    }
+
+    function updatePedagogicalInsights() {
+      const container = document.getElementById('insight-text');
+      const a = params.a;
+      const b = params.b;
+      const c = params.c;
+
+      if (currentLang === 'vi') {
+        if (currentMode === 'two-parabolas') {
+          container.innerHTML = `
+            <strong>So sánh và Tương giao hai Parabol (Toán 9):</strong>
+            <div class="insight-bullet">• (P₁) có a₁ = ${formatNumber(params.a)} (${params.a > 0 ? 'bề lõm quay lên' : 'bề lõm quay xuống'}).</div>
+            <div class="insight-bullet">• (P₂) có a₂ = ${formatNumber(params2.a)} (${params2.a > 0 ? 'bề lõm quay lên' : 'bề lõm quay xuống'}).</div>
+            <div class="insight-bullet">• Phương trình hoành độ giao điểm: <code>(${formatNumber(params.a - params2.a)})x² + (${formatNumber(params.b - params2.b)})x + (${formatNumber(params.c - params2.c)}) = 0</code>.</div>
+            <div class="insight-bullet">• Học sinh có thể bật <em>"🖐️ Kéo đồ thị"</em> để kéo đỉnh của cả hai parabol và xem trực tiếp sự biến đổi của giao điểm!</div>
+          `;
+        } else if (currentMode === 'linear') {
+          container.innerHTML = `
+            <strong>Khảo sát đường thẳng y = ${formatLinearEquation(a, b)}:</strong>
+            <div class="insight-bullet">• Hệ số góc <strong>a = ${formatNumber(a)}</strong> quyết định hướng nghiêng của đường thẳng (${a > 0 ? 'đồng biến, đi lên' : (a < 0 ? 'nghịch biến, đi xuống' : 'hàm hằng')}).</div>
+            <div class="insight-bullet">• Tung độ gốc <strong>b = ${formatNumber(b)}</strong>: vị trí đường thẳng cắt trục Oy tại (0; ${formatNumber(b)}).</div>
+            <div class="insight-bullet">• Bạn có thể nhấp giữ kéo điểm cắt Oy hoặc kéo điểm trên đường thẳng để đổi trực tiếp hệ số!</div>
+          `;
+        } else if (currentMode === 'quadratic') {
+          const xI = -b / (2 * a);
+          const yI = -(b * b - 4 * a * c) / (4 * a);
+          container.innerHTML = `
+            <strong>Khảo sát Parabol y = ${formatQuadraticEquation(a, b, c)}:</strong>
+            <div class="insight-bullet">• Đỉnh <strong>I(${formatNumber(xI)}; ${formatNumber(yI)})</strong>: Hãy nhấp giữ kéo đỉnh I trên canvas để tịnh tiến Parabol.</div>
+            <div class="insight-bullet">• Hệ số <strong>a = ${formatNumber(a)}</strong>: Kéo điểm tròn màu xanh trên Parabol để co giãn hoặc lật bề lõm.</div>
+            <div class="insight-bullet">• Trục đối xứng <strong>x = ${formatNumber(xI)}</strong> chia Parabol thành hai nhánh đối xứng hoàn hảo.</div>
+          `;
+        } else {
+          // Intersect
+          container.innerHTML = `
+            <strong>Tương giao Parabol (P) và Đường thẳng (d):</strong>
+            <div class="insight-bullet">• PT hoành độ: <code>${formatNumber(params.a)}x² - ${formatNumber(params.b)}x - ${formatNumber(params.c)} = 0</code>.</div>
+            <div class="insight-bullet">• Biệt thức Δ tương giao quyết định vị trí tương đối: Δ > 0 (cắt tại 2 điểm), Δ = 0 (tiếp xúc), Δ < 0 (không giao nhau).</div>
+          `;
+        }
+      } else {
+        container.innerHTML = `
+          <strong>Pedagogical Analysis:</strong>
+          <div class="insight-bullet">• Use the <strong>🖐️ Drag Graph</strong> feature to drag vertex I and change coefficients visually.</div>
+          <div class="insight-bullet">• Click <strong>📍 Pin Point</strong> to mark coordinates on Oxy and check whether they satisfy the curve.</div>
+        `;
+      }
+    }
+
+    function updateDataTable() {
+      const table = document.getElementById('points-data-table');
+      const testX = [-2, -1, 0, 1, 2];
+      let html = '';
+
+      if (currentMode === 'two-parabolas') {
+        html += `<thead><tr><th>x</th>`;
+        testX.forEach(x => { html += `<th>${x}</th>`; });
+        html += `</tr></thead><tbody>`;
+
+        html += `<tr><td style="font-weight:700; color:#2563eb;">y (P₁)</td>`;
+        testX.forEach(x => {
+          const y1 = params.a * x * x + params.b * x + params.c;
+          html += `<td style="color:#2563eb;">${formatNumber(y1)}</td>`;
+        });
+        html += `</tr>`;
+
+        html += `<tr><td style="font-weight:700; color:#f59e0b;">y (P₂)</td>`;
+        testX.forEach(x => {
+          const y2 = params2.a * x * x + params2.b * x + params2.c;
+          html += `<td style="color:#f59e0b;">${formatNumber(y2)}</td>`;
+        });
+        html += `</tr></tbody>`;
+      } else if (currentMode === 'intersect') {
+        html += `<thead><tr><th>x</th>`;
+        testX.forEach(x => { html += `<th>${x}</th>`; });
+        html += `</tr></thead><tbody>`;
+
+        html += `<tr><td style="font-weight:700; color:#2563eb;">y (P)</td>`;
+        testX.forEach(x => {
+          html += `<td style="color:#2563eb;">${formatNumber(params.a * x * x)}</td>`;
+        });
+        html += `</tr>`;
+
+        html += `<tr><td style="font-weight:700; color:#e11d48;">y (d)</td>`;
+        testX.forEach(x => {
+          html += `<td style="color:#e11d48;">${formatNumber(params.b * x + params.c)}</td>`;
+        });
+        html += `</tr></tbody>`;
+      } else {
+        html += `<thead><tr><th>x</th>`;
+        testX.forEach(x => { html += `<th>${x}</th>`; });
+        html += `</tr></thead><tbody><tr><td style="font-weight:700; background:#f8fafc;">y = f(x)</td>`;
+        testX.forEach(x => {
+          html += `<td>${formatNumber(evaluateMainFunction(x))}</td>`;
+        });
+        html += `</tr></tbody>`;
+      }
+
+      table.innerHTML = html;
+    }
+
+    function updateLegendUI() {
+      const legend = document.getElementById('canvas-legend');
+      const t = L[currentLang];
+      let html = '';
+
+      if (currentMode === 'two-parabolas') {
+        html = `
+          <div class="legend-item"><div class="legend-line" style="background:#2563eb;"></div> <span>${t.legendP1}</span></div>
+          <div class="legend-item"><div class="legend-line" style="background:#f59e0b;"></div> <span>${t.legendP2}</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ec4899;"></div> <span>${t.legendIntersect}</span></div>
+        `;
+      } else if (currentMode === 'linear') {
+        html = `
+          <div class="legend-item"><div class="legend-line" style="background:#2563eb;"></div> <span>y = ax + b</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;"></div> <span>${t.legendOy}</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10b981;"></div> <span>${t.legendOx}</span></div>
+        `;
+      } else if (currentMode === 'quadratic') {
+        html = `
+          <div class="legend-item"><div class="legend-line" style="background:#2563eb;"></div> <span>y = ax² + bx + c</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ef4444;"></div> <span>${t.legendVertex}</span></div>
+          <div class="legend-item"><div class="legend-line" style="background:#6366f1; border-top:1px dashed #6366f1;"></div> <span>${t.legendAxis}</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;"></div> <span>${t.legendOy}</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10b981;"></div> <span>${t.legendOx}</span></div>
+        `;
+      } else {
+        html = `
+          <div class="legend-item"><div class="legend-line" style="background:#2563eb;"></div> <span>(P): y = ax²</span></div>
+          <div class="legend-item"><div class="legend-line" style="background:#e11d48;"></div> <span>(d): y = bx + c</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6;"></div> <span>${t.legendIntersect}</span></div>
+        `;
+      }
+
+      if (customMarkedPoints.length > 0) {
+        html += `<div class="legend-item"><div class="legend-dot" style="background:#7c3aed;"></div> <span>${t.legendMarked}</span></div>`;
+      }
+
+      legend.innerHTML = html;
+    }
+
+    /**
+     * CANVAS DRAWING ENGINE (Retina & Smooth Coordinate Oxy)
+     */
+    function drawGraph() {
+      const rect = canvasWrapper.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const originX = width / 2 + viewport.offsetX;
+      const originY = height / 2 + viewport.offsetY;
+      const scale = viewport.scale;
+
+      // 1. Grid
+      if (viewport.showGrid) {
+        drawGrid(width, height, originX, originY, scale);
+      }
+
+      // 2. Axes
+      drawAxes(width, height, originX, originY, scale);
+
+      // 3. Challenge Targets
+      drawChallengeTargets(originX, originY, scale);
+
+      // 4. Function Graphs
+      if (currentMode === 'linear') {
+        drawLinearMode(width, height, originX, originY, scale);
+      } else if (currentMode === 'quadratic') {
+        drawQuadraticMode(width, height, originX, originY, scale);
+      } else if (currentMode === 'intersect') {
+        drawIntersectMode(width, height, originX, originY, scale);
+      } else if (currentMode === 'two-parabolas') {
+        drawTwoParabolasMode(width, height, originX, originY, scale);
+      }
+
+      // 5. Custom Marked Points
+      drawCustomMarkedPoints(originX, originY, scale);
+
+      // 6. Direct Drag Handles (if enabled)
+      if (isDirectDragEnabled) {
+        drawDirectDragHandles(width, height, originX, originY, scale);
+      }
+
+      // 7. Dynamic Inspection Hover
+      if (viewport.hoverActive && viewport.mouseMathX !== null && !viewport.isPanning && !activeDragHandle) {
+        drawInspectionOverlay(width, height, originX, originY, scale);
+      }
+    }
+
+    function drawGrid(w, h, ox, oy, scale) {
+      let unitStep = 1;
+      if (scale < 25) unitStep = 2;
+      if (scale < 12) unitStep = 5;
+      if (scale > 100) unitStep = 0.5;
+
+      // Minor grid
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#f8fafc';
+      ctx.beginPath();
+      const subPix = (unitStep / 5) * scale;
+      const leftSub = Math.floor(-ox / subPix);
+      const rightSub = Math.ceil((w - ox) / subPix);
+      for (let i = leftSub; i <= rightSub; i++) {
+        const x = ox + i * subPix;
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+      }
+      const topSub = Math.floor(-oy / subPix);
+      const botSub = Math.ceil((h - oy) / subPix);
+      for (let j = topSub; j <= botSub; j++) {
+        const y = oy + j * subPix;
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+      }
+      ctx.stroke();
+
+      // Major grid
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.beginPath();
+      const pix = unitStep * scale;
+      const leftMajor = Math.floor(-ox / pix);
+      const rightMajor = Math.ceil((w - ox) / pix);
+      for (let i = leftMajor; i <= rightMajor; i++) {
+        const x = ox + i * pix;
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+      }
+      const topMajor = Math.floor(-oy / pix);
+      const botMajor = Math.ceil((h - oy) / pix);
+      for (let j = topMajor; j <= botMajor; j++) {
+        const y = oy + j * pix;
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+      }
+      ctx.stroke();
+    }
+
+    function drawAxes(w, h, ox, oy, scale) {
+      ctx.lineWidth = 1.8;
+      ctx.strokeStyle = '#1e293b';
+      ctx.fillStyle = '#1e293b';
+      ctx.font = '12px system-ui, -apple-system, sans-serif';
+
+      // Ox
+      ctx.beginPath();
+      ctx.moveTo(0, oy);
+      ctx.lineTo(w, oy);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(w - 10, oy - 5);
+      ctx.lineTo(w, oy);
+      ctx.lineTo(w - 10, oy + 5);
+      ctx.fill();
+      ctx.fillText('x', w - 16, oy - 10);
+
+      // Oy
+      ctx.beginPath();
+      ctx.moveTo(ox, h);
+      ctx.lineTo(ox, 0);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(ox - 5, 10);
+      ctx.lineTo(ox, 0);
+      ctx.lineTo(ox + 5, 10);
+      ctx.fill();
+      ctx.fillText('y', ox + 10, 16);
+
+      ctx.fillText('O', ox - 14, oy + 16);
+
+      // Axis ticks
+      let unitStep = 1;
+      if (scale < 25) unitStep = 2;
+      if (scale < 12) unitStep = 5;
+      if (scale > 100) unitStep = 0.5;
+
+      const pix = unitStep * scale;
+      ctx.fillStyle = '#64748b';
+      ctx.font = '10px monospace';
+
+      const left = Math.floor(-ox / pix);
+      const right = Math.ceil((w - ox) / pix);
+      for (let i = left; i <= right; i++) {
+        if (i === 0) continue;
+        const x = ox + i * pix;
+        ctx.beginPath();
+        ctx.moveTo(x, oy - 3);
+        ctx.lineTo(x, oy + 3);
+        ctx.strokeStyle = '#94a3b8';
+        ctx.stroke();
+        ctx.fillText(formatNumber(i * unitStep), x - 6, oy + 16);
+      }
+
+      const top = Math.floor(-oy / pix);
+      const bot = Math.ceil((h - oy) / pix);
+      for (let j = top; j <= bot; j++) {
+        if (j === 0) continue;
+        const y = oy + j * pix;
+        ctx.beginPath();
+        ctx.moveTo(ox - 3, y);
+        ctx.lineTo(ox + 3, y);
+        ctx.strokeStyle = '#94a3b8';
+        ctx.stroke();
+        ctx.fillText(formatNumber(-j * unitStep), ox + 8, y + 4);
+      }
+    }
+
+    function toScreenX(mathX, ox, scale) { return ox + mathX * scale; }
+    function toScreenY(mathY, oy, scale) { return oy - mathY * scale; }
+    function toMathX(screenX, ox, scale) { return (screenX - ox) / scale; }
+    function toMathY(screenY, oy, scale) { return -(screenY - oy) / scale; }
+
+    function drawLinearMode(w, h, ox, oy, scale) {
+      const a = params.a;
+      const b = params.b;
+
+      const xLeftMath = toMathX(0, ox, scale);
+      const xRightMath = toMathX(w, ox, scale);
+      const yLeftMath = a * xLeftMath + b;
+      const yRightMath = a * xRightMath + b;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.moveTo(0, toScreenY(yLeftMath, oy, scale));
+      ctx.lineTo(w, toScreenY(yRightMath, oy, scale));
+      ctx.stroke();
+      ctx.restore();
+
+      drawKeyPoint(toScreenX(0, ox, scale), toScreenY(b, oy, scale), '#f59e0b', `(0; ${formatNumber(b)})`, 'top-right');
+
+      if (Math.abs(a) > 1e-9) {
+        const rootX = -b / a;
+        drawKeyPoint(toScreenX(rootX, ox, scale), toScreenY(0, oy, scale), '#10b981', `(${formatNumber(rootX)}; 0)`, 'bottom-left');
+      }
+    }
+
+    function drawQuadraticMode(w, h, ox, oy, scale) {
+      const a = params.a;
+      const b = params.b;
+      const c = params.c;
+
+      if (Math.abs(a) < 1e-9) {
+        drawLinearMode(w, h, ox, oy, scale);
+        return;
+      }
+
+      // Axis of symmetry
+      const xVertex = -b / (2 * a);
+      const delta = b * b - 4 * a * c;
+      const yVertex = -delta / (4 * a);
+
+      const screenXAxis = toScreenX(xVertex, ox, scale);
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = '#6366f1';
+      ctx.lineWidth = 1.8;
+      ctx.setLineDash([6, 6]);
+      ctx.moveTo(screenXAxis, 0);
+      ctx.lineTo(screenXAxis, h);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.fillStyle = '#6366f1';
+      ctx.font = 'bold 11px system-ui';
+      ctx.fillText(`x = ${formatNumber(xVertex)}`, screenXAxis + 6, 24);
+
+      // Curve
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 3;
+      ctx.lineJoin = 'round';
+
+      let started = false;
+      for (let px = 0; px <= w; px += 2) {
+        const mathX = toMathX(px, ox, scale);
+        const mathY = a * mathX * mathX + b * mathX + c;
+        const rawPy = toScreenY(mathY, oy, scale);
+        const py = Math.max(-h * 2, Math.min(h * 3, rawPy));
+
+        if (!started) {
+          ctx.moveTo(px, py);
+          started = true;
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // Vertex I
+      drawKeyPoint(screenXAxis, toScreenY(yVertex, oy, scale), '#ef4444', `I(${formatNumber(xVertex)}; ${formatNumber(yVertex)})`, a > 0 ? 'bottom-center' : 'top-center');
+
+      // Oy intercept
+      drawKeyPoint(toScreenX(0, ox, scale), toScreenY(c, oy, scale), '#f59e0b', `(0; ${formatNumber(c)})`, 'top-right');
+
+      // Ox intercepts
+      if (delta > 0) {
+        const root1 = (-b - Math.sqrt(delta)) / (2 * a);
+        const root2 = (-b + Math.sqrt(delta)) / (2 * a);
+        drawKeyPoint(toScreenX(root1, ox, scale), toScreenY(0, oy, scale), '#10b981', `x₁=${formatNumber(root1)}`, 'bottom-left');
+        drawKeyPoint(toScreenX(root2, ox, scale), toScreenY(0, oy, scale), '#10b981', `x₂=${formatNumber(root2)}`, 'bottom-right');
+      } else if (Math.abs(delta) < 1e-9) {
+        drawKeyPoint(screenXAxis, toScreenY(0, oy, scale), '#10b981', `x=${formatNumber(xVertex)}`, 'bottom-right');
+      }
+    }
+
+    function drawIntersectMode(w, h, ox, oy, scale) {
+      const a = params.a;
+      const b = params.b;
+      const c = params.c;
+
+      // Parabola P: y = ax^2
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 3;
+      let started = false;
+      for (let px = 0; px <= w; px += 2) {
+        const mathX = toMathX(px, ox, scale);
+        const mathY = a * mathX * mathX;
+        const rawPy = toScreenY(mathY, oy, scale);
+        const py = Math.max(-h * 2, Math.min(h * 3, rawPy));
+        if (!started) { ctx.moveTo(px, py); started = true; } else { ctx.lineTo(px, py); }
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // Line d: y = bx + c
+      const xLeftMath = toMathX(0, ox, scale);
+      const xRightMath = toMathX(w, ox, scale);
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = '#e11d48';
+      ctx.lineWidth = 2.5;
+      ctx.moveTo(0, toScreenY(b * xLeftMath + c, oy, scale));
+      ctx.lineTo(w, toScreenY(b * xRightMath + c, oy, scale));
+      ctx.stroke();
+      ctx.restore();
+
+      // Intersections
+      if (Math.abs(a) > 1e-9) {
+        const delta = b * b + 4 * a * c;
+        if (delta > 0) {
+          const x1 = (b - Math.sqrt(delta)) / (2 * a);
+          const y1 = a * x1 * x1;
+          const x2 = (b + Math.sqrt(delta)) / (2 * a);
+          const y2 = a * x2 * x2;
+          drawIntersectionPoint(toScreenX(x1, ox, scale), toScreenY(y1, oy, scale), `A(${formatNumber(x1)}; ${formatNumber(y1)})`);
+          drawIntersectionPoint(toScreenX(x2, ox, scale), toScreenY(y2, oy, scale), `B(${formatNumber(x2)}; ${formatNumber(y2)})`);
+        } else if (Math.abs(delta) < 1e-9) {
+          const x0 = b / (2 * a);
+          const y0 = a * x0 * x0;
+          drawIntersectionPoint(toScreenX(x0, ox, scale), toScreenY(y0, oy, scale), `M(${formatNumber(x0)}; ${formatNumber(y0)})`);
+        }
+      }
+    }
+
+    function drawTwoParabolasMode(w, h, ox, oy, scale) {
+      // 1. Draw P1
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 3;
+      let started1 = false;
+      for (let px = 0; px <= w; px += 2) {
+        const mathX = toMathX(px, ox, scale);
+        const mathY = params.a * mathX * mathX + params.b * mathX + params.c;
+        const py = Math.max(-h * 2, Math.min(h * 3, toScreenY(mathY, oy, scale)));
+        if (!started1) { ctx.moveTo(px, py); started1 = true; } else { ctx.lineTo(px, py); }
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // 2. Draw P2
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 3;
+      let started2 = false;
+      for (let px = 0; px <= w; px += 2) {
+        const mathX = toMathX(px, ox, scale);
+        const mathY = params2.a * mathX * mathX + params2.b * mathX + params2.c;
+        const py = Math.max(-h * 2, Math.min(h * 3, toScreenY(mathY, oy, scale)));
+        if (!started2) { ctx.moveTo(px, py); started2 = true; } else { ctx.lineTo(px, py); }
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // Intersections between P1 and P2
+      const da = params.a - params2.a;
+      const db = params.b - params2.b;
+      const dc = params.c - params2.c;
+
+      if (Math.abs(da) > 1e-9) {
+        const dDelta = db * db - 4 * da * dc;
+        if (dDelta > 0) {
+          const x1 = (-db - Math.sqrt(dDelta)) / (2 * da);
+          const y1 = params.a * x1 * x1 + params.b * x1 + params.c;
+          const x2 = (-db + Math.sqrt(dDelta)) / (2 * da);
+          const y2 = params.a * x2 * x2 + params.b * x2 + params.c;
+          drawIntersectionPoint(toScreenX(x1, ox, scale), toScreenY(y1, oy, scale), `M₁(${formatNumber(x1)}; ${formatNumber(y1)})`, '#ec4899');
+          drawIntersectionPoint(toScreenX(x2, ox, scale), toScreenY(y2, oy, scale), `M₂(${formatNumber(x2)}; ${formatNumber(y2)})`, '#ec4899');
+        } else if (Math.abs(dDelta) < 1e-9) {
+          const x0 = -db / (2 * da);
+          const y0 = params.a * x0 * x0 + params.b * x0 + params.c;
+          drawIntersectionPoint(toScreenX(x0, ox, scale), toScreenY(y0, oy, scale), `T(${formatNumber(x0)}; ${formatNumber(y0)}) [Tiếp xúc]`, '#ec4899');
+        }
+      } else if (Math.abs(db) > 1e-9) {
+        const xCross = -dc / db;
+        const yCross = params.a * xCross * xCross + params.b * xCross + params.c;
+        drawIntersectionPoint(toScreenX(xCross, ox, scale), toScreenY(yCross, oy, scale), `M(${formatNumber(xCross)}; ${formatNumber(yCross)})`, '#ec4899');
+      }
+    }
+
+    function drawCustomMarkedPoints(ox, oy, scale) {
+      customMarkedPoints.forEach(pt => {
+        const sx = toScreenX(pt.x, ox, scale);
+        const sy = toScreenY(pt.y, oy, scale);
+        const belongs = checkPointBelongsToGraph(pt.x, pt.y);
+        const color = belongs ? '#10b981' : '#8b5cf6';
+
+        ctx.save();
+        // Dashed lines to axes
+        ctx.beginPath();
+        ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = belongs ? 'rgba(16, 185, 129, 0.4)' : 'rgba(139, 92, 246, 0.35)';
+        ctx.lineWidth = 1;
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(sx, oy);
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(ox, sy);
+        ctx.stroke();
+
+        // Pin point outer
+        ctx.beginPath();
+        ctx.arc(sx, sy, 8, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.25;
+        ctx.fill();
+
+        // Inner solid
+        ctx.beginPath();
+        ctx.arc(sx, sy, 5, 0, Math.PI * 2);
+        ctx.globalAlpha = 1.0;
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Tag label
+        ctx.font = 'bold 11px system-ui';
+        const label = `${pt.name}(${formatNumber(pt.x)}; ${formatNumber(pt.y)})`;
+        const tw = ctx.measureText(label).width;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.fillRect(sx + 8, sy - 14, tw + 8, 16);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(sx + 8, sy - 14, tw + 8, 16);
+        ctx.fillStyle = color;
+        ctx.fillText(label, sx + 12, sy - 2);
+
+        ctx.restore();
+      });
+    }
+
+    function drawDirectDragHandles(w, h, ox, oy, scale) {
+      if (currentMode === 'linear') {
+        // Handle 1: Intercept (0, b)
+        const sOyX = toScreenX(0, ox, scale);
+        const sOyY = toScreenY(params.b, oy, scale);
+        drawInteractiveHandle(sOyX, sOyY, '#f59e0b', '↕ Kéo b');
+
+        // Handle 2: Point on line at x = 2
+        const sSlopeX = toScreenX(2, ox, scale);
+        const sSlopeY = toScreenY(params.a * 2 + params.b, oy, scale);
+        drawInteractiveHandle(sSlopeX, sSlopeY, '#2563eb', '⇅ Kéo dốc a');
+      } else if (currentMode === 'quadratic') {
+        const a = params.a;
+        if (Math.abs(a) > 1e-9) {
+          const xVertex = -params.b / (2 * a);
+          const yVertex = -(params.b * params.b - 4 * a * params.c) / (4 * a);
+          const sVx = toScreenX(xVertex, ox, scale);
+          const sVy = toScreenY(yVertex, oy, scale);
+          drawInteractiveHandle(sVx, sVy, '#ef4444', '✥ Kéo Đỉnh I');
+
+          // Handle for curvature a at x = xVertex + 1
+          const sCurvX = toScreenX(xVertex + 1, ox, scale);
+          const sCurvY = toScreenY(a * 1 + yVertex, oy, scale);
+          drawInteractiveHandle(sCurvX, sCurvY, '#2563eb', '↕ Kéo bề lõm a');
+        }
+      } else if (currentMode === 'two-parabolas') {
+        // Vertex 1
+        const a1 = params.a;
+        if (Math.abs(a1) > 1e-9) {
+          const xV1 = -params.b / (2 * a1);
+          const yV1 = -(params.b * params.b - 4 * a1 * params.c) / (4 * a1);
+          drawInteractiveHandle(toScreenX(xV1, ox, scale), toScreenY(yV1, oy, scale), '#2563eb', '✥ Đỉnh I₁');
+        }
+        // Vertex 2
+        const a2 = params2.a;
+        if (Math.abs(a2) > 1e-9) {
+          const xV2 = -params2.b / (2 * a2);
+          const yV2 = -(params2.b * params2.b - 4 * a2 * params2.c) / (4 * a2);
+          drawInteractiveHandle(toScreenX(xV2, ox, scale), toScreenY(yV2, oy, scale), '#f59e0b', '✥ Đỉnh I₂');
+        }
+      }
+    }
+
+    function drawInteractiveHandle(sx, sy, color, label) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(sx, sy, 10, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.2;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(sx, sy, 6, 0, Math.PI * 2);
+      ctx.globalAlpha = 1.0;
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      if (label) {
+        ctx.font = 'bold 10px system-ui';
+        const tw = ctx.measureText(label).width;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+        ctx.fillRect(sx - tw/2 - 4, sy + 10, tw + 8, 14);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(label, sx - tw/2, sy + 21);
+      }
+      ctx.restore();
+    }
+
+    function drawKeyPoint(sx, sy, color, label, pos = 'top-right') {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(sx, sy, 7, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.3;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(sx, sy, 4.5, 0, Math.PI * 2);
+      ctx.globalAlpha = 1.0;
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      if (label) {
+        ctx.font = 'bold 11px system-ui';
+        const tw = ctx.measureText(label).width;
+        let lx = sx + 8;
+        let ly = sy - 8;
+        if (pos === 'bottom-left') { lx = sx - tw - 10; ly = sy + 18; }
+        else if (pos === 'bottom-right') { lx = sx + 8; ly = sy + 18; }
+        else if (pos === 'bottom-center') { lx = sx - tw / 2; ly = sy + 20; }
+        else if (pos === 'top-center') { lx = sx - tw / 2; ly = sy - 12; }
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.fillRect(lx - 4, ly - 12, tw + 8, 16);
+        ctx.strokeStyle = 'rgba(226, 232, 240, 0.9)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(lx - 4, ly - 12, tw + 8, 16);
+        ctx.fillStyle = color;
+        ctx.fillText(label, lx, ly);
+      }
+      ctx.restore();
+    }
+
+    function drawIntersectionPoint(sx, sy, label, color = '#8b5cf6') {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(sx, sy, 10, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.25;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(sx, sy, 5.5, 0, Math.PI * 2);
+      ctx.globalAlpha = 1.0;
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.font = 'bold 11px system-ui';
+      const tw = ctx.measureText(label).width;
+      const lx = sx + 10;
+      const ly = sy - 10;
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.fillRect(lx - 4, ly - 12, tw + 8, 17);
+      ctx.strokeStyle = '#c4b5fd';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(lx - 4, ly - 12, tw + 8, 17);
+
+      ctx.fillStyle = color;
+      ctx.fillText(label, lx, ly);
+      ctx.restore();
+    }
+
+    function drawChallengeTargets(ox, oy, scale) {
+      const activeCh = L[currentLang].challenges[activeChallengeIndex];
+      if (!activeCh || !activeCh.targets) return;
+
+      activeCh.targets.forEach(tgt => {
+        const sx = toScreenX(tgt.x, ox, scale);
+        const sy = toScreenY(tgt.y, oy, scale);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(sx, sy, 12, 0, Math.PI * 2);
+        ctx.strokeStyle = '#9333ea';
+        ctx.setLineDash([4, 4]);
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(sx, sy, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#9333ea';
+        ctx.fill();
+
+        ctx.font = 'bold 11px system-ui';
+        ctx.fillStyle = '#581c87';
+        ctx.fillText(tgt.label, sx + 14, sy + 4);
+        ctx.restore();
+      });
+    }
+
+    function drawInspectionOverlay(w, h, ox, oy, scale) {
+      const mx = viewport.mouseMathX;
+      if (mx === null) return;
+
+      const my1 = evaluateMainFunction(mx);
+      const sx = toScreenX(mx, ox, scale);
+      const sy1 = toScreenY(my1, oy, scale);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = 'rgba(100, 116, 139, 0.6)';
+      ctx.lineWidth = 1.2;
+      ctx.moveTo(sx, 0);
+      ctx.lineTo(sx, h);
+      ctx.moveTo(0, sy1);
+      ctx.lineTo(w, sy1);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(sx, sy1, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#2563eb';
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    /**
+     * CANVAS INTERACTION & DIRECT GRAPH DRAGGING
+     */
+    function setupCanvasEvents() {
+      // Find what handle was clicked under cursor
+      function hitTestHandles(screenX, screenY) {
+        const rect = canvasWrapper.getBoundingClientRect();
+        const ox = rect.width / 2 + viewport.offsetX;
+        const oy = rect.height / 2 + viewport.offsetY;
+        const scale = viewport.scale;
+        const radius = 16; // hit threshold
+
+        // 1. Check custom marked points first
+        for (let pt of customMarkedPoints) {
+          const sx = toScreenX(pt.x, ox, scale);
+          const sy = toScreenY(pt.y, oy, scale);
+          if (Math.hypot(screenX - sx, screenY - sy) <= radius) {
+            return { type: 'custom_point', point: pt };
+          }
+        }
+
+        if (!isDirectDragEnabled) return null;
+
+        if (currentMode === 'linear') {
+          // Check Intercept B (0, b)
+          const sBy = toScreenY(params.b, oy, scale);
+          if (Math.hypot(screenX - ox, screenY - sBy) <= radius) {
+            return { type: 'line_b' };
+          }
+          // Check slope handle at x = 2
+          const sSx = toScreenX(2, ox, scale);
+          const sSy = toScreenY(params.a * 2 + params.b, oy, scale);
+          if (Math.hypot(screenX - sSx, screenY - sSy) <= radius) {
+            return { type: 'line_slope' };
+          }
+        } else if (currentMode === 'quadratic') {
+          const a = params.a;
+          if (Math.abs(a) > 1e-9) {
+            const xV = -params.b / (2 * a);
+            const yV = -(params.b * params.b - 4 * a * params.c) / (4 * a);
+            const sVx = toScreenX(xV, ox, scale);
+            const sVy = toScreenY(yV, oy, scale);
+            if (Math.hypot(screenX - sVx, screenY - sVy) <= radius) {
+              return { type: 'vertex', target: 'p1' };
+            }
+
+            // Curvature handle at xV + 1
+            const sCx = toScreenX(xV + 1, ox, scale);
+            const sCy = toScreenY(a + yV, oy, scale);
+            if (Math.hypot(screenX - sCx, screenY - sCy) <= radius) {
+              return { type: 'curvature', target: 'p1', xV, yV };
+            }
+          }
+        } else if (currentMode === 'two-parabolas') {
+          // Vertex 1
+          const xV1 = -params.b / (2 * params.a);
+          const yV1 = -(params.b * params.b - 4 * params.a * params.c) / (4 * params.a);
+          if (Math.hypot(screenX - toScreenX(xV1, ox, scale), screenY - toScreenY(yV1, oy, scale)) <= radius) {
+            return { type: 'vertex', target: 'p1' };
+          }
+          // Vertex 2
+          const xV2 = -params2.b / (2 * params2.a);
+          const yV2 = -(params2.b * params2.b - 4 * params2.a * params2.c) / (4 * params2.a);
+          if (Math.hypot(screenX - toScreenX(xV2, ox, scale), screenY - toScreenY(yV2, oy, scale)) <= radius) {
+            return { type: 'vertex', target: 'p2' };
+          }
+        }
+
+        return null;
+      }
+
+      // Right Click (Context Menu) -> Instant Delete Point
+      canvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const screenX = e.clientX - rect.left;
+        const screenY = e.clientY - rect.top;
+        const hit = hitTestHandles(screenX, screenY);
+        if (hit && hit.type === 'custom_point') {
+          removeCustomPoint(hit.point.id);
+          updateCanvasHint((currentLang === 'vi') ? `Đã xóa điểm ${hit.point.name}` : `Deleted point ${hit.point.name}`);
+        }
+      });
+
+      // Mouse Down
+      canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const screenX = e.clientX - rect.left;
+        const screenY = e.clientY - rect.top;
+        const ox = rect.width / 2 + viewport.offsetX;
+        const oy = rect.height / 2 + viewport.offsetY;
+        const mathX = toMathX(screenX, ox, viewport.scale);
+        const mathY = toMathY(screenY, oy, viewport.scale);
+
+        // If in Eraser Mode -> Remove clicked point!
+        if (isEraserToolActive) {
+          const hit = hitTestHandles(screenX, screenY);
+          if (hit && hit.type === 'custom_point') {
+            removeCustomPoint(hit.point.id);
+            updateCanvasHint((currentLang === 'vi') ? `Đã xóa điểm ${hit.point.name}` : `Deleted point ${hit.point.name}`);
+            return;
+          }
+        }
+
+        // If in Marker Mode -> Place point!
+        if (isMarkerToolActive) {
+          // Snap to 0.5 if close, else exact
+          const snapX = Math.round(mathX * 2) / 2;
+          const snapY = Math.round(mathY * 2) / 2;
+          const finalX = Math.abs(mathX - snapX) < 0.15 ? snapX : mathX;
+          const finalY = Math.abs(mathY - snapY) < 0.15 ? snapY : mathY;
+          addCustomPoint(finalX, finalY);
+          return;
+        }
+
+        // Test handles for dragging
+        const hit = hitTestHandles(screenX, screenY);
+        if (hit) {
+          activeDragHandle = hit;
+          canvas.classList.add('cursor-drag-active');
+          return;
+        }
+
+        // Otherwise -> Pan canvas
+        viewport.isPanning = true;
+        viewport.panStartX = e.clientX - viewport.offsetX;
+        viewport.panStartY = e.clientY - viewport.offsetY;
+        canvas.style.cursor = 'grabbing';
+      });
+
+      // Mouse Move
+      window.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const screenX = e.clientX - rect.left;
+        const screenY = e.clientY - rect.top;
+        const isInCanvas = (
+          e.clientX >= rect.left && e.clientX <= rect.right &&
+          e.clientY >= rect.top && e.clientY <= rect.bottom
+        );
+
+        const ox = rect.width / 2 + viewport.offsetX;
+        const oy = rect.height / 2 + viewport.offsetY;
+        const currentMathX = toMathX(screenX, ox, viewport.scale);
+        const currentMathY = toMathY(screenY, oy, viewport.scale);
+
+        if (activeDragHandle) {
+          // Direct drag logic
+          if (activeDragHandle.type === 'custom_point') {
+            activeDragHandle.point.x = parseFloat(currentMathX.toFixed(2));
+            activeDragHandle.point.y = parseFloat(currentMathY.toFixed(2));
+            renderCustomPointsList();
+          } else if (activeDragHandle.type === 'line_b') {
+            params.b = parseFloat(currentMathY.toFixed(2));
+            autoExpandSlider('b', params.b);
+            updateInputsUI();
+          } else if (activeDragHandle.type === 'line_slope') {
+            const newSlope = (currentMathY - params.b) / 2;
+            params.a = parseFloat(newSlope.toFixed(2));
+            autoExpandSlider('a', params.a);
+            updateInputsUI();
+          } else if (activeDragHandle.type === 'vertex') {
+            const targetP = (activeDragHandle.target === 'p2') ? params2 : params;
+            const newVx = parseFloat(currentMathX.toFixed(2));
+            const newVy = parseFloat(currentMathY.toFixed(2));
+            targetP.b = parseFloat((-2 * targetP.a * newVx).toFixed(2));
+            targetP.c = parseFloat((targetP.a * newVx * newVx + newVy).toFixed(2));
+            autoExpandSlider('b', targetP.b);
+            autoExpandSlider('c', targetP.c);
+            updateInputsUI();
+          } else if (activeDragHandle.type === 'curvature') {
+            const deltaY = currentMathY - activeDragHandle.yV;
+            params.a = parseFloat(deltaY.toFixed(2));
+            if (Math.abs(params.a) < 0.05) params.a = deltaY >= 0 ? 0.05 : -0.05;
+            params.b = parseFloat((-2 * params.a * activeDragHandle.xV).toFixed(2));
+            params.c = parseFloat((params.a * activeDragHandle.xV * activeDragHandle.xV + activeDragHandle.yV).toFixed(2));
+            autoExpandSlider('a', params.a);
+            autoExpandSlider('b', params.b);
+            autoExpandSlider('c', params.c);
+            updateInputsUI();
+          }
+          renderAll();
+          updateCursorBadge(screenX, screenY);
+          return;
+        }
+
+        if (viewport.isPanning) {
+          viewport.offsetX = e.clientX - viewport.panStartX;
+          viewport.offsetY = e.clientY - viewport.panStartY;
+          drawGraph();
+          updateCursorBadge(screenX, screenY);
+        } else if (isInCanvas) {
+          viewport.hoverActive = true;
+          viewport.mouseMathX = currentMathX;
+          viewport.mouseMathY = currentMathY;
+          viewport.mouseScreenX = screenX;
+          viewport.mouseScreenY = screenY;
+
+          // Check if hovering a handle to show appropriate cursor
+          const hoverHit = hitTestHandles(screenX, screenY);
+          if (hoverHit && hoverHit.type === 'custom_point') {
+            canvas.style.cursor = isEraserToolActive ? 'pointer' : 'grab';
+          } else if (hoverHit && !isMarkerToolActive && !isEraserToolActive) {
+            canvas.style.cursor = 'pointer';
+          } else if (!isMarkerToolActive && !isEraserToolActive) {
+            canvas.style.cursor = 'crosshair';
+          }
+
+          drawGraph();
+          updateCursorBadge(screenX, screenY);
+        } else {
+          if (viewport.hoverActive) {
+            viewport.hoverActive = false;
+            cursorBadge.style.display = 'none';
+            drawGraph();
+          }
+        }
+      });
+
+      // Mouse Up
+      window.addEventListener('mouseup', () => {
+        if (activeDragHandle) {
+          activeDragHandle = null;
+          canvas.classList.remove('cursor-drag-active');
+        }
+        if (viewport.isPanning) {
+          viewport.isPanning = false;
+          canvas.style.cursor = isMarkerToolActive ? 'copy' : 'crosshair';
+        }
+      });
+
+      // Wheel Zoom
+      canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const originX = rect.width / 2 + viewport.offsetX;
+        const originY = rect.height / 2 + viewport.offsetY;
+
+        const mathX = toMathX(mouseX, originX, viewport.scale);
+        const mathY = toMathY(mouseY, originY, viewport.scale);
+
+        const zoomFactor = e.deltaY < 0 ? 1.15 : 0.87;
+        const newScale = Math.max(10, Math.min(300, viewport.scale * zoomFactor));
+
+        viewport.scale = newScale;
+        viewport.offsetX = mouseX - rect.width / 2 - mathX * newScale;
+        viewport.offsetY = mouseY - rect.height / 2 + mathY * newScale;
+
+        drawGraph();
+        updateCursorBadge(mouseX, mouseY);
+      }, { passive: false });
+
+      // Touch events
+      canvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          viewport.isPanning = true;
+          viewport.panStartX = e.touches[0].clientX - viewport.offsetX;
+          viewport.panStartY = e.touches[0].clientY - viewport.offsetY;
+        }
+      });
+
+      canvas.addEventListener('touchmove', (e) => {
+        if (viewport.isPanning && e.touches.length === 1) {
+          e.preventDefault();
+          viewport.offsetX = e.touches[0].clientX - viewport.panStartX;
+          viewport.offsetY = e.touches[0].clientY - viewport.panStartY;
+          drawGraph();
+        }
+      }, { passive: false });
+
+      canvas.addEventListener('touchend', () => {
+        viewport.isPanning = false;
+      });
+    }
+
+    function updateCursorBadge(screenX, screenY) {
+      if (!viewport.hoverActive || activeDragHandle) {
+        cursorBadge.style.display = 'none';
+        return;
+      }
+      const mx = viewport.mouseMathX;
+      if (mx === null) return;
+
+      let text = `x: ${formatNumber(mx, 2)}`;
+      if (currentMode === 'two-parabolas') {
+        const y1 = params.a * mx * mx + params.b * mx + params.c;
+        const y2 = params2.a * mx * mx + params2.b * mx + params2.c;
+        text += ` | y(P₁): ${formatNumber(y1, 2)} | y(P₂): ${formatNumber(y2, 2)}`;
+      } else if (currentMode === 'intersect') {
+        const yP = params.a * mx * mx;
+        const yD = params.b * mx + params.c;
+        text += ` | y(P): ${formatNumber(yP, 2)} | y(d): ${formatNumber(yD, 2)}`;
+      } else {
+        const my = evaluateMainFunction(mx);
+        text += ` | y: ${formatNumber(my, 2)}`;
+      }
+
+      cursorBadge.textContent = text;
+      cursorBadge.style.left = `${screenX}px`;
+      cursorBadge.style.top = `${screenY}px`;
+      cursorBadge.style.display = 'block';
+    }
+
+    /**
+     * TOOLBAR CONTROLS
+     */
+    function zoomCanvas(factor) {
+      viewport.scale = Math.max(10, Math.min(300, viewport.scale * factor));
+      drawGraph();
+    }
+
+    function resetCanvasView() {
+      viewport.offsetX = 0;
+      viewport.offsetY = 0;
+      viewport.scale = 45;
+      drawGraph();
+    }
+
+    function toggleGrid() {
+      viewport.showGrid = !viewport.showGrid;
+      document.getElementById('btn-toggle-grid').classList.toggle('active', viewport.showGrid);
+      drawGraph();
+    }
+
+    function exportGraphImage() {
+      const link = document.createElement('a');
+      link.download = `do-thi-toan-9-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function toggleFullscreen() {
+      const elem = document.getElementById('workspace-area');
+      if (!document.fullscreenElement) {
+        elem.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    /**
+     * CHALLENGES & QUIZ ENGINE
+     */
+    function onSelectChallenge(index) {
+      activeChallengeIndex = parseInt(index);
+      challengeHintVisible = false;
+      document.getElementById('challenge-result-box').style.display = 'none';
+      document.getElementById('challenge-hint-box').style.display = 'none';
+
+      const ch = L[currentLang].challenges[activeChallengeIndex];
+      if (ch.mode !== currentMode) {
+        switchMode(ch.mode);
+      } else {
+        updateChallengeCard();
+        renderAll();
+      }
+    }
+
+    function updateChallengeCard() {
+      const ch = L[currentLang].challenges[activeChallengeIndex];
+      if (!ch) return;
+      document.getElementById('challenge-desc-text').textContent = ch.desc;
+    }
+
+    function toggleChallengeHint() {
+      const ch = L[currentLang].challenges[activeChallengeIndex];
+      const hintBox = document.getElementById('challenge-hint-box');
+      challengeHintVisible = !challengeHintVisible;
+      if (challengeHintVisible) {
+        hintBox.textContent = ch.hint;
+        hintBox.style.display = 'block';
+      } else {
+        hintBox.style.display = 'none';
+      }
+    }
+
+    function checkChallengeAnswer() {
+      const ch = L[currentLang].challenges[activeChallengeIndex];
+      const resBox = document.getElementById('challenge-result-box');
+      const sol = ch.solution;
+      const eps = 0.15;
+
+      let isCorrect = false;
+      if (ch.mode === 'two-parabolas') {
+        isCorrect = (
+          Math.abs(params.a - sol.a) < eps &&
+          Math.abs(params.b - sol.b) < eps &&
+          Math.abs(params.c - sol.c) < eps &&
+          Math.abs(params2.a - sol.a2) < eps &&
+          Math.abs(params2.b - sol.b2) < eps &&
+          Math.abs(params2.c - sol.c2) < eps
+        );
+      } else {
+        isCorrect = (
+          Math.abs(params.a - sol.a) < eps &&
+          Math.abs(params.b - sol.b) < eps &&
+          (ch.mode === 'linear' || Math.abs(params.c - sol.c) < eps)
+        );
+      }
+
+      if (isCorrect) {
+        resBox.className = 'challenge-result success';
+        resBox.innerHTML = (currentLang === 'vi')
+          ? `🎉 <strong>Chính xác xuất sắc!</strong> Bạn đã hoàn thành đúng mục tiêu thử thách!`
+          : `🎉 <strong>Brilliant! Correct!</strong> You achieved the challenge target!`;
+      } else {
+        resBox.className = 'challenge-result error';
+        resBox.innerHTML = (currentLang === 'vi')
+          ? `❌ <strong>Chưa chính xác!</strong> Hãy quan sát các điểm đích trên đồ thị hoặc kéo thả các đỉnh để khớp mục tiêu.`
+          : `❌ <strong>Not quite right!</strong> Adjust coefficients or drag the handles onto the target!`;
+      }
+    }
+
+    function applyChallengeSolution() {
+      const ch = L[currentLang].challenges[activeChallengeIndex];
+      params.a = ch.solution.a;
+      params.b = ch.solution.b;
+      params.c = ch.solution.c;
+      if (ch.mode === 'two-parabolas' && ch.solution.a2 !== undefined) {
+        params2.a = ch.solution.a2;
+        params2.b = ch.solution.b2;
+        params2.c = ch.solution.c2;
+      }
+      updateInputsUI();
+      renderAll();
+      checkChallengeAnswer();
+    }
+
+    /**
+     * MODAL GUIDE
+     */
+    function openHelpModal() {
+      document.getElementById('help-modal').style.display = 'flex';
+    }
+
+    function closeHelpModal() {
+      document.getElementById('help-modal').style.display = 'none';
+    }
+
+    /**
+     * STANDALONE EXPORT - DOWNLOAD EXACT HTML FILE
+     */
+    function downloadStandaloneHTML() {
+      const htmlContent = "<!doctype html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mo-phong-do-thi-toan-9.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "Mô phỏng Tương tác Đồ thị Hàm số Lớp 9",
+  "description": "Ứng dụng tương tác trực quan đồ thị hàm số bậc nhất, bậc hai và tương giao Parabol - đường thẳng dành cho học sinh Lớp 9 với Canvas Oxy, bảng giá trị, giải thích sư phạm và thử thách toán học.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
